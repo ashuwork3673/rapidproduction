@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import "../../app/globals.css";
+import Sidebar from "@/Component/Sidebar";
 
 // Dynamically import the CKEditor component (with SSR disabled)
 const MyEditorComponent = dynamic(() => import('@/Component/custom-editor'), { ssr: false });
@@ -84,6 +85,9 @@ const EditPost = () => {
   }
 
   return (
+    <div className="flex h-screen ">
+      {/* sidebar */}
+      <Sidebar/>
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
         Edit Post
@@ -232,6 +236,7 @@ const EditPost = () => {
           </button>
         </div>
       </form>
+    </div>
     </div>
   );
 };

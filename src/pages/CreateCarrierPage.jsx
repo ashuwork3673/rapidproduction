@@ -1,5 +1,5 @@
 "use client";
-
+import Sidebar from '@/Component/Sidebar';
 import { useState } from 'react';
 import '../app/globals.css';
 
@@ -99,7 +99,11 @@ const CreateCarrierPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+
+    <div className="flex h-screen">
+    {/* sidebar  */}
+    <Sidebar/>
+    <div className="max-w-4xl container p-4">
       <h1 className="text-2xl font-bold text-center mb-6">Create Carrier</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Carrier Info Fields */}
@@ -278,6 +282,7 @@ const CreateCarrierPage = () => {
           Create Carrier
         </button>
       </form>
+    </div>
     </div>
   );
 };
