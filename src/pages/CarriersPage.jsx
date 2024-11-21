@@ -57,7 +57,7 @@ const statesList = [
   "Wyoming",
 ];
 
-const CarriersPage = ({ carrier }) => {
+const CarriersPage = () => {
   const [selectedState1, setSelectedState1] = useState("");
   const [selectedState2, setSelectedState2] = useState("");
   const [carriers, setCarriers] = useState([]);
