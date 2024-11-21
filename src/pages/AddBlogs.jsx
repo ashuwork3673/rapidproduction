@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import "../app/globals.css";
 import MyEditorComponent from "@/Component/custom-editor";
+import Sidebar from "@/Component/Sidebar";
 
 const CreatePost = () => {
   const [title, setTitle] = useState("");
@@ -53,6 +54,9 @@ const CreatePost = () => {
   };
 
   return (
+    <div className="flex h-screen">
+      {/* sidebar  */}
+      <Sidebar/>
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
         Create New Post
@@ -196,7 +200,8 @@ const CreatePost = () => {
         </div>
       </form>
     </div>
-  );
+    </div>  
+    );
 };
 
 export default CreatePost;
