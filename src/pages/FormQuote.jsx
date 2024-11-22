@@ -1,7 +1,4 @@
-// pages/FormQuote.js
 import { useState, useEffect } from "react";
-import { FaHome, FaFileAlt, FaClipboardList, FaBars } from "react-icons/fa";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import axios from "axios";
 import "../app/globals.css";
@@ -38,12 +35,11 @@ const FormQuote = () => {
       form.quote_id.toString().toLowerCase().includes(query) ||
       form.phone.toLowerCase().includes(query) ||
       form.email.toLowerCase().includes(query) ||
-      form.username.toLowerCase().includes(query) || // Added usernam // Added model with null check
-      (form.note && form.note.toLowerCase().includes(query)) || // Added note with null check
-      (form.pickup_id && form.pickup_id.toLowerCase().includes(query)) // Added pickup_id with null check
+      form.username.toLowerCase().includes(query) || 
+      (form.note && form.note.toLowerCase().includes(query)) || 
+      (form.pickup_id && form.pickup_id.toLowerCase().includes(query))
     );
   });
-  
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -56,15 +52,38 @@ const FormQuote = () => {
   const totalPages = Math.ceil(filteredForms.length / itemsPerPage);
 
   const handleFormClick = (form) => {
+    // Store form's quote_id in localStorage when clicked
+    let clickedForms = JSON.parse(localStorage.getItem("clickedForms")) || [];
+    if (!clickedForms.includes(form.quote_id)) {
+      clickedForms.push(form.quote_id);
+      localStorage.setItem("clickedForms", JSON.stringify(clickedForms));
+    }
+
+    // Redirect to the details page
     router.push(`/QuoteDetails?id=${form._id}`);
   };
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  // Determine if the form is new (for example, created within the last 24 hours)
+  const isNewForm = (createdAt) => {
+    const currentDate = new Date();
+    const formDate = new Date(createdAt);
+    const timeDifference = currentDate - formDate;
+    const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+    return timeDifference < oneDayInMilliseconds;
+  };
+
+  // Check if a form's quote_id exists in localStorage (indicating it's been clicked)
+  const isClicked = (quoteId) => {
+    const clickedForms = JSON.parse(localStorage.getItem("clickedForms")) || [];
+    return clickedForms.includes(quoteId);
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-     <Sidebar/>
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-6 mt-14">
@@ -73,7 +92,6 @@ const FormQuote = () => {
           <input
             type="text"
             className="p-2 w-full bg-gray-100 border border-gray-300 rounded-md"
-           
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -99,7 +117,11 @@ const FormQuote = () => {
                 <tr
                   key={form.id}
                   onClick={() => handleFormClick(form)}
-                  className={`cursor-pointer hover:bg-indigo-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}
+                  className={`cursor-pointer hover:bg-indigo-50 ${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                  } ${isNewForm(form.createdAt) ? "bg-yellow-100" : ""} ${
+                    !isClicked(form.quote_id) ? "bg-red-100" : ""
+                  }`} // Apply red background to the entire row if not clicked
                 >
                   <td className="px-6 py-4 border-b border-gray-200">{form.quote_id}</td>
                   <td className="px-6 py-4 border-b border-gray-200">{form.username}</td>
@@ -114,12 +136,18 @@ const FormQuote = () => {
                           : form.status === "waiting"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                      } `}
                     >
                       {form.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-indigo-600 font-bold underline">Details</td>
+                  <td
+                    className={`px-6 py-4 text-indigo-600 font-bold underline ${
+                      isClicked(form.quote_id) ? "" : "bg-red-100"
+                    }`}
+                  >
+                    Details
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -138,7 +166,9 @@ const FormQuote = () => {
               <button
                 key={index}
                 onClick={() => handlePageChange(index + 1)}
-                className={`px-4 py-2 rounded-md ${currentPage === index + 1 ? "bg-indigo-600 text-white" : "bg-white text-indigo-600"}`}
+                className={`px-4 py-2 rounded-md ${
+                  currentPage === index + 1 ? "bg-indigo-600 text-white" : "bg-white text-indigo-600"
+                }`}
               >
                 {index + 1}
               </button>
