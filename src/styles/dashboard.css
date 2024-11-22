@@ -4,3 +4,18 @@
 .gapa{
 gap: 3%;
 }
+.uflex {
+display: flex;
+
+}
+
+@media only screen and (max-width: 600px) {
+.wt{
+    width: 100%;
+    margin: 3% 0;
+}
+.uflex {
+    display: inline;
+    
+    }
+}

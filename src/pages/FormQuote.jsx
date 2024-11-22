@@ -67,9 +67,7 @@ const FormQuote = () => {
      <Sidebar/>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-4">Form Quote List</h2>
-
+      <div className="flex-1 p-6 mt-14">
         {/* Search Bar */}
         <div className="mb-4">
           <input
@@ -128,7 +126,7 @@ const FormQuote = () => {
           </table>
 
           {/* Pagination Controls */}
-          <div className="mt-4 flex justify-center space-x-2">
+          <div className="mt-4 flex p-4 justify-center space-x-2">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}

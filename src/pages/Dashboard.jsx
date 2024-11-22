@@ -183,13 +183,13 @@ const Dashboard = () => {
   if (isLoading) return <div>Loading...</div>;
 
   return (
-    <div className="flex h-screen  bg-gray-100">
+    <div className="h-screen bg-gray-100 inline sm:flex md:flex 2xl:flex">
       {/* Sidebar */}
     <Sidebar/>
 
       {/* Main content with Graphs */}
-      <div className="flex-1 p-6">
-        <h1 className="text-3xl font-bold mb-6">Dashboard Analytics</h1>
+      <div className="flex-1 p-6 mt-14">
+      <h1 className="text-2xl sm:text-xl font-bold mb-6">Dashboard Analytics</h1>
 
         {/* Filter Selectors */}
         <div className="mb-4 flex space-x-4">
@@ -229,7 +229,7 @@ const Dashboard = () => {
         </div>
 
         <div className="  gap-6">
-          <div className="flex w-full gapa ">
+          <div className="uflex w-full gapa ">
           {/* Graph 1 - Make and Model Distribution */}
           <div className="bg-white shadow-lg p-6 wt rounded-lg">
             <h2 className="text-xl font-semibold mb-4">
