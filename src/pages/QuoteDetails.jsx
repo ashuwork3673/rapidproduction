@@ -1,25 +1,26 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Link from "next/link";
-import { FaHome, FaFileAlt, FaClipboardList, FaBars } from "react-icons/fa";
 import "../app/globals.css";
+import Sidebar from "@/Component/Sidebar";
+import SelectCarriers from "@/Component/SelectCarrier";
+
 
 const QuoteDetails = () => {
   const router = useRouter();
   const { id } = router.query;
   const [form, setForm] = useState(null);
-  const [username,setUsername] = useState("")
-  const [femail,setFEmail] = useState("")
-  const [phone,setPhone] = useState("")
-  const [ship_from,setShipFrom] = useState("")
-  const [ship_to,setShipTo] = useState("")
-  const [transport_method,setTransportMethod] = useState("")
-  const [year,setYear] = useState("")
-  const [make,setMake] = useState("")
-  const [model,setModel] = useState("")
-  const [vechile_type,setVechileType] = useState("")
-  const [pickup_date,setPickupDate] = useState("")
+  const [username, setUsername] = useState("");
+  const [femail, setFEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [ship_from, setShipFrom] = useState("");
+  const [ship_to, setShipTo] = useState("");
+  const [transport_method, setTransportMethod] = useState("");
+  const [year, setYear] = useState("");
+  const [make, setMake] = useState("");
+  const [model, setModel] = useState("");
+  const [vechile_type, setVechileType] = useState("");
+  const [pickup_date, setPickupDate] = useState("");
   const [pickupId, setPickupId] = useState("");
   const [paymentUrl, setPaymentUrl] = useState("");
   const [status, setStatus] = useState("");
@@ -42,7 +43,8 @@ const QuoteDetails = () => {
   });
   const [cardDetails, setCardDetails] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
-  
+  const [CarrierDetails, setCarrierDetails] = useState(null);
+  const [isCarrierModalOpen, setIsCarrierModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -151,6 +153,22 @@ const QuoteDetails = () => {
       console.error("Error fetching card details:", error);
     }
   };
+  const fetchCarrierDetails = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/selected_carrier");
+      const matchedCarrier = response.data.find(
+        (Carrier) => Carrier.quote_id === form.quote_id
+      );
+      if (matchedCarrier) {
+        setCarrierDetails(matchedCarrier);
+        setIsCarrierModalOpen(true);
+      } else {
+        alert("No matching Carrier found for this quote.");
+      }
+    } catch (error) {
+      console.error("Error fetching Carrier details:", error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -172,7 +190,7 @@ const QuoteDetails = () => {
         make: make || form.make,
         model: model || form.model,
         vehicle_type: vechile_type || form.vehicle_type,
-        pickup_date: pickup_date| form.pickup_date,
+        pickup_date: pickup_date | form.pickup_date,
         pickup_id: pickupId || form.pickup_id,
         payment_url: paymentUrl || form.payment_url,
         price: price || form.price,
@@ -180,18 +198,15 @@ const QuoteDetails = () => {
         note_time: note ? new Date().toISOString() : form.note_time,
         status: status || form.status,
       };
-  
+
       // Axios PUT request to update the form
       await axios.put(`http://localhost:5000/api/form/${id}`, updatedData);
-  
+
       alert("Form updated successfully");
     } catch (error) {
       console.error("Error updating form:", error);
     }
   };
-  
-
-
 
   const handleSendEmail = async () => {
     const emailPayload = {
@@ -224,7 +239,7 @@ const QuoteDetails = () => {
     }
   };
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
 
   if (!form)
     return <div className="text-center text-gray-600 py-10">Loading...</div>;
@@ -232,436 +247,381 @@ const QuoteDetails = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <div
-        className={`transition-all duration-300 ${
-          sidebarOpen ? "w-64" : "w-16"
-        } bg-indigo-700 text-white p-4 relative h-full`}
-      >
-        <button
-          onClick={toggleSidebar}
-          className="absolute top-5 right-5 bg-gray-800 text-white p-2 rounded-lg"
-        >
-          <FaBars />
-        </button>
-        <div className="mt-10 space-y-4">
-          <ul>
-            <li>
-              <Link
-                href="/Dashboard"
-                className="flex items-center py-3 px-4 hover:bg-indigo-700 rounded-md transition"
-              >
-                <FaHome className="mr-4 text-xl" />
-                {sidebarOpen && (
-                  <span className="text-xl font-medium">Dashboard</span>
-                )}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/FormQuote"
-                className="flex items-center py-3 px-4 hover:bg-indigo-700 rounded-md transition"
-              >
-                <FaFileAlt className="mr-4 text-xl" />
-                {sidebarOpen && (
-                  <span className="text-xl font-medium">Form Quote</span>
-                )}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/BlogList"
-                className="flex items-center py-3 px-4 hover:bg-indigo-700 rounded-md transition"
-              >
-                <FaClipboardList className="mr-4 text-xl" />
-                {sidebarOpen && (
-                  <span className="text-xl font-medium">Blogs</span>
-                )}
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </div>
-
+      <Sidebar />
+      <div className="flex-1 flex">
       {/* Main Content */}
-<div className="flex-1 overflow-y-auto p-6 bg-gray-100">
-  <div className="max-w-3xl  bg-white rounded-lg shadow-lg p-6 h-auto flex flex-col justify-between">
-    <h1 className="text-3xl font-semibold text-gray-800 mb-6">
-      Form Quote Details
-    </h1>
+      <div className="w-3/5 bg-gray-200 p-6 overflow-y-auto">
+        <div className="max-w-3xl  bg-white rounded-lg shadow-lg p-6 h-auto flex flex-col justify-between">
+          <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+            Form Quote Details
+          </h1>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Left Column */}
-      <div className="space-y-4">
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Quote ID:</span>
-          <span className="text-gray-800">{form.quote_id}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Name:</span>
-          <span className="text-gray-800">{form.username}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Email:</span>
-          <span className="text-gray-800">{form.email}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Phone:</span>
-          <span className="text-gray-800">{form.phone}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Shipping From:</span>
-          <span className="text-gray-800">{form.ship_form}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Shipping To:</span>
-          <span className="text-gray-800">{form.ship_to}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Transport Method:</span>
-          <span className="text-gray-800">{form.transport_method}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">IP Address:</span>
-          <span className="text-gray-800">{form.ip}</span>
-        </div>
-      </div>
-
-      {/* Right Column */}
-      <div className="space-y-4">
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Year:</span>
-          <span className="text-gray-800">{form.year}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Make:</span>
-          <span className="text-gray-800">{form.make}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Model:</span>
-          <span className="text-gray-800">{form.model}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Vehicle Type:</span>
-          <span className="text-gray-800">{form.vehicle_type}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Pickup Date:</span>
-          <span className="text-gray-800">{form.pickup_date}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Distance:</span>
-          <span className="text-gray-800">{form.distance}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Price:</span>
-          <span className="text-gray-800">$ {form.price}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-semibold text-gray-600">Source URL:</span>
-          <span className="text-gray-800">{form.sourceUrl}</span>
-        </div>
-      </div>
-    </div>
-
-    <div className="mt-2 space-y-4">
-      <div className="flex flex-col">
-        <label className="font-semibold text-gray-600">Pickup ID</label>
-        <div className="flex items-center">
-          <input
-            type="text"
-            value={pickupId || form.pickup_id}
-            onChange={(e) => setPickupId(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Enter Pickup ID"
-          />
-          <button
-            onClick={handleUpdateForm}
-            className="bg-green-500 text-white p-2 rounded ml-2"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col">
-        <label className="font-semibold text-gray-600">Note</label>
-        <div className="flex items-center">
-          <textarea
-            value={note || form.note}
-            onChange={(e) => setNote(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Enter Note"
-          ></textarea>
-          <button
-            onClick={handleUpdateForm}
-            className="bg-green-500 text-white p-2 rounded ml-2"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col">
-        <label className="font-semibold text-gray-600">Payment URL</label>
-        <div className="flex items-center">
-          <input
-            type="url"
-            value={paymentUrl || form.payment_url}
-            onChange={(e) => setPaymentUrl(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Enter Payment URL"
-          />
-          <button
-            onClick={handleUpdateForm}
-            className="bg-green-500 text-white p-2 rounded ml-2"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col">
-        <label className="font-semibold text-gray-600">Price</label>
-        <div className="flex items-center">
-          <input
-            type="number"
-            value={price || form.price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Enter Price"
-          />
-          <button
-            onClick={handleUpdateForm}
-            className="bg-green-500 text-white p-2 rounded ml-2"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-
-      {/* Status Radio Buttons */}
-      <div className="mt-8 space-y-4">
-        <label className="font-semibold text-gray-600">Status</label>
-        <div className="flex flex-wrap items-center gap-4">
-          <label>
-            <input
-              type="radio"
-              value="waiting"
-              checked={status === "waiting"}
-              onChange={(e) => setStatus(e.target.value)}
-              className="mr-2"
-            />
-            Waiting
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="in-progress"
-              checked={status === "in-progress"}
-              onChange={(e) => setStatus(e.target.value)}
-              className="mr-2"
-            />
-            In-Progress
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="Done"
-              checked={status === "Done"}
-              onChange={(e) => setStatus(e.target.value)}
-              className="mr-2"
-            />
-            Done
-          </label>
-          <button
-            onClick={handleUpdateForm}
-            className="bg-green-500 text-white p-2 rounded ml-auto"
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div className="mt-8 flex flex-wrap gap-4 justify-center sm:justify-start">
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="bg-blue-500 text-white p-2 rounded"
-      >
-        View Quote
-      </button>
-      <button
-        onClick={() => setIsDModalOpen(true)}
-        className="bg-blue-500 text-white p-2 rounded"
-      >
-        Driver Confirm
-      </button>
-
-      <button
-        onClick={fetchCardDetails}
-        className="bg-purple-500 text-white p-2 rounded"
-      >
-        View Card Details
-      </button>
-
-      <button
-        onClick={() => setIsEditModalOpen(true)}
-        className="bg-yellow-500 text-white p-2 rounded"
-      >
-        Edit
-      </button>
-   
- 
-</div>
-
-<div className="max-w-3xl  bg-white rounded-lg shadow-lg p-6 h-auto flex flex-col justify-between">
-
-
-
-
-  
-</div>
-
-
-
-
-
-
-
-            {/* Edit Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] sm:w-[800px] max-h-[80vh] overflow-y-auto">
-            <h2>Edit Quote Details</h2>
-
-            {/* Editable Form */}
-            <div>
-              <div>
-                <label>Username</label>
-                <input
-                  type="text"
-                  value={username || form.username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  
-                />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Quote ID:</span>
+                <span className="text-gray-800">{form.quote_id}</span>
               </div>
-              <div>
-                <label>Email</label>
-                <input
-                  type="text"
-                  value={femail || form.email}
-                  onChange={(e) => setFEmail(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                
-                />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Name:</span>
+                <span className="text-gray-800">{form.username}</span>
               </div>
-              <div>
-                <label>Phone</label>
-                <input
-                  type="text"
-                  value={phone || form.phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  
-                />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Email:</span>
+                <span className="text-gray-800">{form.email}</span>
               </div>
-              <div>
-                <label>Ship From</label>
-                <input
-                  type="text"
-                  value={ship_from || form.ship_form}
-                  onChange={(e) => setShipFrom(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                 
-                />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Phone:</span>
+                <span className="text-gray-800">{form.phone}</span>
               </div>
-              <div>
-                <label>Ship To</label>
-                <input
-                  type="text"
-                  value={ship_to || form.ship_to}
-                  onChange={(e) => setShipTo(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                 
-                />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">
+                  Shipping From:
+                </span>
+                <span className="text-gray-800">{form.ship_form}</span>
               </div>
-              <div>
-                <label>Transport Method</label>
-                <input
-                  type="text"
-                  value={transport_method || form.transport_method}
-                  onChange={(e) => setTransportMethod(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                 
-                />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">
+                  Shipping To:
+                </span>
+                <span className="text-gray-800">{form.ship_to}</span>
               </div>
-              <div>
-                <label>Year</label>
-                <input
-                  type="text"
-                  value={year || form.year}
-                  onChange={(e) => setYear(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                
-                />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">
+                  Transport Method:
+                </span>
+                <span className="text-gray-800">{form.transport_method}</span>
               </div>
-              <div>
-                <label>Make</label>
-                <input
-                  type="text"
-                  value={make || form.make}
-                  onChange={(e) => setMake(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">IP Address:</span>
+                <span className="text-gray-800">{form.ip}</span>
               </div>
-              <div>
-                <label>Model</label>
-                <input
-                  type="text"
-                  value={model || form.model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                 
-                />
-              </div>
-              <div>
-                <label>Vechile Type</label>
-                <input
-                  type="text"
-                  value={vechile_type || form.vehicle_type}
-                  onChange={(e) => setVechileType(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
-              <div>
-                <label>Pickup Date</label>
-                <input
-                  type="text"
-                  value={pickup_date || (form.pickup_date)}
-                  onChange={(e) => setPickupDate(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
-             
-              
+            </div>
 
-              {/* Add more editable fields here... */}
-
-              {/* Update Button */}
-              <button onClick={handleUpdateForm} className="bg-green-500 text-white p-2 rounded">
-                Update Form
-              </button>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="ml-2 bg-gray-500 text-white p-2 rounded"
-              >
-                Cancel
-              </button>
+            {/* Right Column */}
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Year:</span>
+                <span className="text-gray-800">{form.year}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Make:</span>
+                <span className="text-gray-800">{form.make}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Model:</span>
+                <span className="text-gray-800">{form.model}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">
+                  Vehicle Type:
+                </span>
+                <span className="text-gray-800">{form.vehicle_type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">
+                  Pickup Date:
+                </span>
+                <span className="text-gray-800">{form.pickup_date}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Distance:</span>
+                <span className="text-gray-800">{form.distance}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Price:</span>
+                <span className="text-gray-800">$ {form.price}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-600">Source URL:</span>
+                <span className="text-gray-800">{form.sourceUrl}</span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+
+          <div className="mt-2 space-y-4">
+            <div className="flex flex-col">
+              <label className="font-semibold text-gray-600">Pickup ID</label>
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={pickupId || form.pickup_id}
+                  onChange={(e) => setPickupId(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  placeholder="Enter Pickup ID"
+                />
+                <button
+                  onClick={handleUpdateForm}
+                  className="bg-green-500 text-white p-2 rounded ml-2"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="font-semibold text-gray-600">Note</label>
+              <div className="flex items-center">
+                <textarea
+                  value={note || form.note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  placeholder="Enter Note"
+                ></textarea>
+                <button
+                  onClick={handleUpdateForm}
+                  className="bg-green-500 text-white p-2 rounded ml-2"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="font-semibold text-gray-600">Payment URL</label>
+              <div className="flex items-center">
+                <input
+                  type="url"
+                  value={paymentUrl || form.payment_url}
+                  onChange={(e) => setPaymentUrl(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  placeholder="Enter Payment URL"
+                />
+                <button
+                  onClick={handleUpdateForm}
+                  className="bg-green-500 text-white p-2 rounded ml-2"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="font-semibold text-gray-600">Price</label>
+              <div className="flex items-center">
+                <input
+                  type="number"
+                  value={price || form.price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  placeholder="Enter Price"
+                />
+                <button
+                  onClick={handleUpdateForm}
+                  className="bg-green-500 text-white p-2 rounded ml-2"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+
+            {/* Status Radio Buttons */}
+            <div className="mt-8 space-y-4">
+              <label className="font-semibold text-gray-600">Status</label>
+              <div className="flex flex-wrap items-center gap-4">
+                <label>
+                  <input
+                    type="radio"
+                    value="waiting"
+                    checked={status === "waiting"}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="mr-2"
+                  />
+                  Waiting
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="in-progress"
+                    checked={status === "in-progress"}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="mr-2"
+                  />
+                  In-Progress
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="Done"
+                    checked={status === "Done"}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="mr-2"
+                  />
+                  Done
+                </label>
+                <button
+                  onClick={handleUpdateForm}
+                  className="bg-green-500 text-white p-2 rounded ml-auto"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-4 justify-center sm:justify-start">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-500 text-white p-2 rounded"
+            >
+              View Quote
+            </button>
+            <button
+              onClick={() => setIsDModalOpen(true)}
+              className="bg-blue-500 text-white p-2 rounded"
+            >
+              Driver Confirm
+            </button>
+
+            <button
+              onClick={fetchCardDetails}
+              className="bg-purple-500 text-white p-2 rounded"
+            >
+              View Card Details
+            </button>
+            <button
+              onClick={fetchCarrierDetails}
+              className="bg-purple-500 text-white p-2 rounded"
+            >
+              Carriers Details
+            </button>
+
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="bg-yellow-500 text-white p-2 rounded"
+            >
+              Edit
+            </button>
+          </div>
+
+          {/* Edit Modal */}
+          {isEditModalOpen && (
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+              <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] sm:w-[800px] max-h-[80vh] overflow-y-auto">
+                <h2>Edit Quote Details</h2>
+
+                {/* Editable Form */}
+                <div>
+                  <div>
+                    <label>Username</label>
+                    <input
+                      type="text"
+                      value={username || form.username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Email</label>
+                    <input
+                      type="text"
+                      value={femail || form.email}
+                      onChange={(e) => setFEmail(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Phone</label>
+                    <input
+                      type="text"
+                      value={phone || form.phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Ship From</label>
+                    <input
+                      type="text"
+                      value={ship_from || form.ship_form}
+                      onChange={(e) => setShipFrom(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Ship To</label>
+                    <input
+                      type="text"
+                      value={ship_to || form.ship_to}
+                      onChange={(e) => setShipTo(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Transport Method</label>
+                    <input
+                      type="text"
+                      value={transport_method || form.transport_method}
+                      onChange={(e) => setTransportMethod(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Year</label>
+                    <input
+                      type="text"
+                      value={year || form.year}
+                      onChange={(e) => setYear(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Make</label>
+                    <input
+                      type="text"
+                      value={make || form.make}
+                      onChange={(e) => setMake(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Model</label>
+                    <input
+                      type="text"
+                      value={model || form.model}
+                      onChange={(e) => setModel(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Vechile Type</label>
+                    <input
+                      type="text"
+                      value={vechile_type || form.vehicle_type}
+                      onChange={(e) => setVechileType(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+                  <div>
+                    <label>Pickup Date</label>
+                    <input
+                      type="text"
+                      value={pickup_date || form.pickup_date}
+                      onChange={(e) => setPickupDate(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                    />
+                  </div>
+
+                  {/* Add more editable fields here... */}
+
+                  {/* Update Button */}
+                  <button
+                    onClick={handleUpdateForm}
+                    className="bg-green-500 text-white p-2 rounded"
+                  >
+                    Update Form
+                  </button>
+                  <button
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="ml-2 bg-gray-500 text-white p-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Modal for Card Details */}
           {isCardModalOpen && cardDetails && (
@@ -714,6 +674,47 @@ const QuoteDetails = () => {
               </div>
             </div>
           )}
+{isCarrierModalOpen && CarrierDetails && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] sm:w-[800px] max-h-[80vh] overflow-y-auto">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        Selected Carrier Details
+      </h2>
+
+      {/* Display Selected Carrier Details */}
+      <div className="space-y-4">
+       
+        <div>
+          <strong>Carrier Name:</strong> {CarrierDetails.carrier_name}
+        </div>
+        <div>
+          <strong>Carrier Phone:</strong> {CarrierDetails.carrier_company_phone}
+        </div>
+        <div>
+          <strong>Carrier Email:</strong> {CarrierDetails.carrier_company_email}
+        </div>
+        <div>
+          <strong>States Covered:</strong>
+          {CarrierDetails.carrier_routes.map((route, idx) => (
+            <div key={idx}>
+              <strong>{route.route_name}:</strong> {route.states_covered.join(' > ')}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <button
+          onClick={() => setIsCarrierModalOpen(false)}
+          className="ml-4 text-gray-600 py-2 px-6 border rounded"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
           {/* Modal for Email */}
           {isModalOpen && (
@@ -787,6 +788,13 @@ const QuoteDetails = () => {
           )}
         </div>
       </div>
+
+       {/* New Container */}
+  <div className="w-2/5 bg-gray-200 p-6 overflow-y-auto">
+    <h2 className="text-xl font-semibold text-gray-700 mb-4">New Container</h2>
+   <SelectCarriers quote_id={form.quote_id}/>
+  </div>
+    </div>
     </div>
   );
 };
