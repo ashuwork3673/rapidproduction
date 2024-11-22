@@ -1,11 +1,16 @@
 // pages/FormQuote.js
 import { useState, useEffect } from "react";
-import { FaHome, FaFileAlt, FaClipboardList, FaBars } from "react-icons/fa";
+import { FaHome, FaFileAlt, FaClipboardList, FaBars, FaSearch  } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import axios from "axios";
 import "../app/globals.css";
+import "../styles/dashboard.css"
 import Sidebar from "@/Component/Sidebar";
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+/>
 
 const FormQuote = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -69,15 +74,29 @@ const FormQuote = () => {
       {/* Main Content */}
       <div className="flex-1 p-6 mt-14">
         {/* Search Bar */}
-        <div className="mb-4">
-          <input
-            type="text"
-            className="p-2 w-full bg-gray-100 border border-gray-300 rounded-md"
-           
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+  <div className="mb-4 w-full mt-2  center-space flex">
+      {/* Search Bar with Icon inside */}
+      <div className="relative w-6/12">
+        <input
+          type="text"
+          className="p-2 pl-10 w-full  border border-gray-300 rounded-md"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {/* Search Icon inside input */}
+        <FaSearch className="absolute left-3 top-1/2 transform-translate-y-1/2 text-gray-600" />
+      </div>
+
+      {/* Add Quotes Button */}
+      <button
+        className=" px-4 py-2 button-color text-white rounded-md hover:bg-blue-700"
+        onClick={() => console.log("Add Quotes clicked")}
+      >
+        Add Quotes
+      </button>
+    </div>
+
 
         {/* Display email status */}
         {emailStatus && <div className="mt-4 text-green-500 font-semibold">{emailStatus}</div>}
@@ -86,7 +105,7 @@ const FormQuote = () => {
         <div className="mt-4 overflow-x-auto bg-white shadow-md rounded-lg">
           <table className="min-w-full table-auto border-collapse border border-gray-300 rounded-lg">
             <thead>
-              <tr className="bg-indigo-600 text-white">
+              <tr className="accent-bg ttext-white">
                 <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Quote ID</th>
                 <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Name</th>
                 <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Email</th>
@@ -130,7 +149,7 @@ const FormQuote = () => {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md disabled:opacity-50"
+              className="px-4 py-2 button-color text-white rounded-md disabled:opacity-50"
             >
               Prev
             </button>
@@ -138,7 +157,7 @@ const FormQuote = () => {
               <button
                 key={index}
                 onClick={() => handlePageChange(index + 1)}
-                className={`px-4 py-2 rounded-md ${currentPage === index + 1 ? "bg-indigo-600 text-white" : "bg-white text-indigo-600"}`}
+                className={`px-4 py-2 rounded-md ${currentPage === index + 1 ? "button-color text-white" : "bg-white text-indigo-600"}`}
               >
                 {index + 1}
               </button>
@@ -146,7 +165,7 @@ const FormQuote = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md disabled:opacity-50"
+              className="px-4 py-2 button-color text-white rounded-md disabled:opacity-50"
             >
               Next
             </button>

@@ -106,29 +106,7 @@ function ResponsiveSidebar() {
   return (
     <div style={styles.container}>
       {/* Sidebar for large screens */}
-      <div style={styles.sidebarLarge}>
-        <h2 style={styles.logo}>Rapid Auto Shipping</h2>
-        <ul style={styles.menu}>
-          <li style={styles.menuItem}>
-            <Link href="/Dashboard" style={styles.link}>
-              <FaHome style={styles.icon} />
-              <span style={styles.text}>Dashboard</span>
-            </Link>
-          </li>
-          <li style={styles.menuItem}>
-            <Link href="/FormQuote" style={styles.link}>
-              <FaFileAlt style={styles.icon} />
-              <span style={styles.text}>Form Quote</span>
-            </Link>
-          </li>
-          <li style={styles.menuItem}>
-            <Link href="/BlogList" style={styles.link}>
-              <FaClipboardList style={styles.icon} />
-              <span style={styles.text}>Blogs</span>
-            </Link>
-          </li>
-        </ul>
-      </div>
+     
 
       {/* Navbar for small screens */}
       <div style={styles.navbarSmall}>
