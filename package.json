@@ -12,6 +12,7 @@
     "@ckeditor/ckeditor5-build-classic": "^35.4.0",
     "@ckeditor/ckeditor5-react": "^5.1.0",
     "@ckeditor/ckeditor5-source-editing": "^43.3.1",
+    "@headlessui/react": "^2.2.0",
     "@react-google-maps/api": "^2.20.3",
     "@tinymce/tinymce-react": "^5.1.1",
     "axios": "^1.7.7",
