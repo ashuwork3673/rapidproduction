@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { FaSearch } from "react-icons/fa";
 import axios from "axios";
 import "../app/globals.css";
+import "../styles/dashboard.css"
 import Sidebar from "@/Component/Sidebar";
 import DashboardForm from "@/Component/DashboardForm";
 
@@ -185,7 +186,7 @@ const FormQuote = () => {
                           : form.status === "waiting"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-red-100 text-red-700"
-                      }`}
+                      } `}
                     >
                       {form.status}
                     </span>
@@ -199,7 +200,7 @@ const FormQuote = () => {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md disabled:opacity-50"
+              className="px-4 py-2 button-color text-white rounded-md disabled:opacity-50"
             >
               Prev
             </button>
@@ -219,7 +220,7 @@ const FormQuote = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md disabled:opacity-50"
+              className="px-4 py-2 button-color text-white rounded-md disabled:opacity-50"
             >
               Next
             </button>

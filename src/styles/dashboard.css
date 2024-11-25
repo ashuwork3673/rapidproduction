@@ -4,3 +4,36 @@
 .gapa{
 gap: 3%;
 }
+.uflex {
+display: flex;
+}
+.accent-bg{
+    background-color: #21d0b3;
+}
+.accent{
+    color: #21d0b3;
+}
+.main-center{
+    justify-content: center;
+    align-items: center;
+}
+.center-space{
+    justify-content: space-between;
+    align-items: center;
+}
+.width-full{
+    width: 100%;
+}
+.button-color{
+background-color: #ff5720;
+}
+@media only screen and (max-width: 600px) {
+.wt{
+    width: 100%;
+    margin: 3% 0;
+}
+.uflex {
+    display: inline;
+    
+    }
+}
