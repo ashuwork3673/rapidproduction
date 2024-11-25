@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "../app/globals.css";
 import Sidebar from "@/Component/Sidebar";
+import "../styles/dashboard.css"
 import SelectCarriers from "@/Component/SelectCarrier";
 
 const QuoteDetails = () => {
@@ -197,7 +198,7 @@ const QuoteDetails = () => {
         price: price || form.price,
         note: note || form.note,
         note_time: note ? new Date().toISOString() : form.note_time,
-        status:  newStatus,
+        status: newStatus,
       };
 
       // Axios PUT request to update the form
@@ -244,18 +245,17 @@ const QuoteDetails = () => {
     return <div className="text-center text-gray-600 py-10">Loading...</div>;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex ">
       {/* Sidebar */}
       <Sidebar />
-      <div className="flex-1 flex">
+      <div className="flex-1 bg-green-200 flex mt-14">
         {/* Main Content */}
-        <div className="w-3/5 bg-gray-200 p-6 overflow-y-auto">
-          <div className="max-w-3xl  bg-white rounded-lg shadow-lg p-6 h-auto flex flex-col justify-between">
+          <div className=" width-form bg-blue-500 rounded-lg shadow-lg p-6 h-auto flex flex-col justify-between">
             <h1 className="text-3xl font-semibold text-gray-800 mb-6">
               Form Quote Details
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="gap-6">
               {/* Left Column */}
               <div className="space-y-4">
                 <div className="flex justify-between">
@@ -423,89 +423,89 @@ const QuoteDetails = () => {
 
               {/* Status Radio Buttons */}
               <div className="mt-8 space-y-4">
-  <label className="font-semibold text-gray-600">Status</label>
-  <div className="flex flex-wrap items-center gap-4">
-    <label>
-      <input
-        type="radio"
-        value="waiting"
-        checked={status === "waiting"}
-        onChange={(e) => {
-          const newStatus = e.target.value;
-          setStatus(newStatus);  // Update the status
-          handleUpdateForm(newStatus);  // Pass the new status to handleUpdateForm
-        }}
-        className="mr-2"
-      />
-      Waiting
-    </label>
-    <label>
-      <input
-        type="radio"
-        value="in-progress"
-        checked={status === "in-progress"}
-        onChange={(e) => {
-          const newStatus = e.target.value;
-          setStatus(newStatus);  // Update the status
-          handleUpdateForm(newStatus);  // Pass the new status to handleUpdateForm
-        }}
-        className="mr-2"
-      />
-      In-Progress
-    </label>
-    <label>
-      <input
-        type="radio"
-        value="Done"
-        checked={status === "Done"}
-        onChange={(e) => {
-          const newStatus = e.target.value;
-          setStatus(newStatus);  // Update the status
-          handleUpdateForm(newStatus);  // Pass the new status to handleUpdateForm
-        }}
-        className="mr-2"
-      />
-      Done
-    </label>
-  </div>
-</div>
+                <label className="font-semibold text-gray-600">Status</label>
+                <div className="flex flex-wrap items-center gap-4">
+                  <label>
+                    <input
+                      type="radio"
+                      value="waiting"
+                      checked={status === "waiting"}
+                      onChange={(e) => {
+                        const newStatus = e.target.value;
+                        setStatus(newStatus);  // Update the status
+                        handleUpdateForm(newStatus);  // Pass the new status to handleUpdateForm
+                      }}
+                      className="mr-2"
+                    />
+                    Waiting
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      value="in-progress"
+                      checked={status === "in-progress"}
+                      onChange={(e) => {
+                        const newStatus = e.target.value;
+                        setStatus(newStatus);  // Update the status
+                        handleUpdateForm(newStatus);  // Pass the new status to handleUpdateForm
+                      }}
+                      className="mr-2"
+                    />
+                    In-Progress
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      value="Done"
+                      checked={status === "Done"}
+                      onChange={(e) => {
+                        const newStatus = e.target.value;
+                        setStatus(newStatus);  // Update the status
+                        handleUpdateForm(newStatus);  // Pass the new status to handleUpdateForm
+                      }}
+                      className="mr-2"
+                    />
+                    Done
+                  </label>
+                </div>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-4 justify-center sm:justify-start">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-blue-500 text-white p-2 rounded"
+                >
+                  View Quote
+                </button>
+                <button
+                  onClick={() => setIsDModalOpen(true)}
+                  className="bg-blue-500 text-white p-2 rounded"
+                >
+                  Driver Confirm
+                </button>
 
+                <button
+                  onClick={fetchCardDetails}
+                  className="bg-purple-500 text-white p-2 rounded"
+                >
+                  View Card Details
+                </button>
+                <button
+                  onClick={fetchCarrierDetails}
+                  className="bg-purple-500 text-white p-2 rounded"
+                >
+                  Carriers Details
+                </button>
+
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="bg-yellow-500 text-white p-2 rounded"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-4 justify-center sm:justify-start">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-blue-500 text-white p-2 rounded"
-              >
-                View Quote
-              </button>
-              <button
-                onClick={() => setIsDModalOpen(true)}
-                className="bg-blue-500 text-white p-2 rounded"
-              >
-                Driver Confirm
-              </button>
 
-              <button
-                onClick={fetchCardDetails}
-                className="bg-purple-500 text-white p-2 rounded"
-              >
-                View Card Details
-              </button>
-              <button
-                onClick={fetchCarrierDetails}
-                className="bg-purple-500 text-white p-2 rounded"
-              >
-                Carriers Details
-              </button>
-
-              <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="bg-yellow-500 text-white p-2 rounded"
-              >
-                Edit
-              </button>
-            </div>
 
             {/* Edit Modal */}
             {isEditModalOpen && (
@@ -807,10 +807,9 @@ const QuoteDetails = () => {
               </div>
             )}
           </div>
-        </div>
-
+        
         {/* New Container */}
-        <div className="w-2/5 bg-gray-200 p-6 overflow-y-auto">
+        <div className="w-2/5 bg-yellow-200 p-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">
             New Container
           </h2>
@@ -822,3 +821,4 @@ const QuoteDetails = () => {
 };
 
 export default QuoteDetails;
+ 

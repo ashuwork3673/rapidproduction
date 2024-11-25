@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaHome, FaFileAlt, FaClipboardList, FaBars, FaSearch  } from "react-icons/fa";
+import { FaHome, FaFileAlt, FaClipboardList, FaBars, FaSearch } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import axios from "axios";
@@ -42,8 +42,8 @@ const FormQuote = () => {
       form.quote_id.toString().toLowerCase().includes(query) ||
       form.phone.toLowerCase().includes(query) ||
       form.email.toLowerCase().includes(query) ||
-      form.username.toLowerCase().includes(query) || 
-      (form.note && form.note.toLowerCase().includes(query)) || 
+      form.username.toLowerCase().includes(query) ||
+      (form.note && form.note.toLowerCase().includes(query)) ||
       (form.pickup_id && form.pickup_id.toLowerCase().includes(query))
     );
   });
@@ -95,28 +95,28 @@ const FormQuote = () => {
       {/* Main Content */}
       <div className="flex-1 p-6 mt-14">
         {/* Search Bar */}
-  <div className="mb-4 w-full mt-2  center-space flex">
-      {/* Search Bar with Icon inside */}
-      <div className="relative w-6/12">
-        <input
-          type="text"
-          className="p-2 pl-10 w-full  border border-gray-300 rounded-md"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {/* Search Icon inside input */}
-        <FaSearch className="absolute left-3 top-1/2 transform-translate-y-1/2 text-gray-600" />
-      </div>
+        <div className="mb-4 w-full mt-2  center-space flex">
+          {/* Search Bar with Icon inside */}
+          <div className="relative  w-6/12">
+            <input
+              type="text"
+              className="p-2 pl-10 w-full  border border-gray-300 rounded-md"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {/* Search Icon inside input */}
+            <FaSearch className="absolute left-3 top-1/2 transform-translate-y-1/2 text-gray-600" />
+          </div>
 
-      {/* Add Quotes Button */}
-      <button
-        className=" px-4 py-2 button-color text-white rounded-md hover:bg-blue-700"
-        onClick={() => console.log("Add Quotes clicked")}
-      >
-        Add Quotes
-      </button>
-    </div>
+          {/* Add Quotes Button */}
+          <button
+            className=" px-4 py-2 button-color text-white rounded-md hover:bg-blue-700"
+            onClick={() => console.log("Add Quotes clicked")}
+          >
+            Add Quotes
+          </button>
+        </div>
 
 
         {/* Display email status */}
@@ -139,34 +139,30 @@ const FormQuote = () => {
                 <tr
                   key={form.id}
                   onClick={() => handleFormClick(form)}
-                  className={`cursor-pointer hover:bg-indigo-50 ${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                  } ${isNewForm(form.createdAt) ? "bg-yellow-100" : ""} ${
-                    !isClicked(form.quote_id) ? "bg-red-100" : ""
-                  }`} // Apply red background to the entire row if not clicked
+                  className={`cursor-pointer hover:bg-indigo-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                    } ${isNewForm(form.createdAt) ? "bg-yellow-100" : ""} ${!isClicked(form.quote_id) ? "bg-red-100" : ""
+                    }`} // Apply red background to the entire row if not clicked
                 >
                   <td className="px-6 py-4 border-b border-gray-200">{form.quote_id}</td>
                   <td className="px-6 py-4 border-b border-gray-200">{form.username}</td>
                   <td className="px-6 py-4 border-b border-gray-200">{form.email}</td>
                   <td className="px-6 py-4 border-b border-gray-200">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        form.status === "Done"
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${form.status === "Done"
                           ? "bg-green-100 text-green-700"
                           : form.status === "in-progress"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : form.status === "waiting"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-red-100 text-red-700"
-                      } `}
+                            ? "bg-yellow-100 text-yellow-700"
+                            : form.status === "waiting"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-red-100 text-red-700"
+                        } `}
                     >
                       {form.status}
                     </span>
                   </td>
                   <td
-                    className={`px-6 py-4 text-indigo-600 font-bold underline ${
-                      isClicked(form.quote_id) ? "" : "bg-red-100"
-                    }`}
+                    className={`px-6 py-4 text-indigo-600 font-bold underline ${isClicked(form.quote_id) ? "" : "bg-red-100"
+                      }`}
                   >
                     Details
                   </td>
