@@ -21,6 +21,17 @@ const QuoteDetails = () => {
   const [model, setModel] = useState("");
   const [vechile_type, setVechileType] = useState("");
   const [pickup_date, setPickupDate] = useState("");
+  const [username, setUsername] = useState("");
+  const [femail, setFEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [ship_from, setShipFrom] = useState("");
+  const [ship_to, setShipTo] = useState("");
+  const [transport_method, setTransportMethod] = useState("");
+  const [year, setYear] = useState("");
+  const [make, setMake] = useState("");
+  const [model, setModel] = useState("");
+  const [vechile_type, setVechileType] = useState("");
+  const [pickup_date, setPickupDate] = useState("");
   const [pickupId, setPickupId] = useState("");
   const [paymentUrl, setPaymentUrl] = useState("");
   const [status, setStatus] = useState("");
@@ -44,6 +55,8 @@ const QuoteDetails = () => {
   });
   const [cardDetails, setCardDetails] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [CarrierDetails, setCarrierDetails] = useState(null);
+  const [isCarrierModalOpen, setIsCarrierModalOpen] = useState(false);
   const [CarrierDetails, setCarrierDetails] = useState(null);
   const [isCarrierModalOpen, setIsCarrierModalOpen] = useState(false);
 
@@ -181,13 +194,31 @@ const QuoteDetails = () => {
       console.error("Error fetching Carrier details:", error);
     }
   };
+  const fetchCarrierDetails = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/api/selected_carrier"
+      );
+      const matchedCarrier = response.data.find(
+        (Carrier) => Carrier.quote_id === form.quote_id
+      );
+      if (matchedCarrier) {
+        setCarrierDetails(matchedCarrier);
+        setIsCarrierModalOpen(true);
+      } else {
+        alert("No matching Carrier found for this quote.");
+      }
+    } catch (error) {
+      console.error("Error fetching Carrier details:", error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditableForm({ ...editableForm, [name]: value });
   };
 
-  const handleUpdateForm = async () => {
+  const handleUpdateForm = async (newStatus) => {
     try {
       // Prepare the updated data, fallback to the existing `form` values if not changed
       const updatedData = {
@@ -203,16 +234,19 @@ const QuoteDetails = () => {
         model: model || form.model,
         vehicle_type: vechile_type || form.vehicle_type,
         pickup_date: pickup_date | form.pickup_date,
+        pickup_date: pickup_date | form.pickup_date,
         pickup_id: pickupId || form.pickup_id,
         payment_url: paymentUrl || form.payment_url,
         price: price || form.price,
         note: note || form.note,
         note_time: note ? new Date().toISOString() : form.note_time,
-        status: status || form.status,
+        status:  newStatus,
       };
+
 
       // Axios PUT request to update the form
       await axios.put(`http://localhost:5000/api/form/${id}`, updatedData);
+
 
       alert("Form updated successfully");
       window.location.reload()
@@ -632,45 +666,47 @@ const QuoteDetails = () => {
             </div>
           )}
 
-          {/* Modal for Card Details */}
-          {isCardModalOpen && cardDetails && (
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
-              <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] sm:w-[800px] max-h-[80vh] overflow-y-auto">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Card Details
-                </h2>
+            {/* Modal for Card Details */}
+            {isCardModalOpen && cardDetails && (
+              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] sm:w-[800px] max-h-[80vh] overflow-y-auto">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                    Card Details
+                  </h2>
 
-                {/* Display Card Details */}
-                <div className="space-y-4">
-                  <div>
-                    <strong>Quote ID:</strong> {cardDetails.quote_id}
+                  {/* Display Card Details */}
+                  <div className="space-y-4">
+                    <div>
+                      <strong>Quote ID:</strong> {cardDetails.quote_id}
+                    </div>
+                    <div>
+                      <strong>Card Holder Name:</strong> {cardDetails.card_name}
+                    </div>
+                    <div>
+                      <strong>Card Number:</strong> {cardDetails.card_number}
+                    </div>
+                    <div>
+                      <strong>Expiration Date:</strong>{" "}
+                      {cardDetails.card_expiry}
+                    </div>
+                    <div>
+                      <strong>CVV:</strong> {cardDetails.card_cvv}
+                    </div>
+                    <div>
+                      <strong>Billing Address:</strong>{" "}
+                      {cardDetails.billing_address}
+                    </div>
+                    <div>
+                      <strong>Billing City:</strong> {cardDetails.billing_city}
+                    </div>
+                    <div>
+                      <strong>Billing State:</strong>{" "}
+                      {cardDetails.billing_state}
+                    </div>
+                    <div>
+                      <strong>Billing Zip:</strong> {cardDetails.billing_zip}
+                    </div>
                   </div>
-                  <div>
-                    <strong>Card Holder Name:</strong> {cardDetails.card_name}
-                  </div>
-                  <div>
-                    <strong>Card Number:</strong> {cardDetails.card_number}
-                  </div>
-                  <div>
-                    <strong>Expiration Date:</strong> {cardDetails.card_expiry}
-                  </div>
-                  <div>
-                    <strong>CVV:</strong> {cardDetails.card_cvv}
-                  </div>
-                  <div>
-                    <strong>Billing Address:</strong>{" "}
-                    {cardDetails.billing_address}
-                  </div>
-                  <div>
-                    <strong>Billing City:</strong> {cardDetails.billing_city}
-                  </div>
-                  <div>
-                    <strong>Billing State:</strong> {cardDetails.billing_state}
-                  </div>
-                  <div>
-                    <strong>Billing Zip:</strong> {cardDetails.billing_zip}
-                  </div>
-                </div>
 
                 <div className="mt-4">
                   <button
