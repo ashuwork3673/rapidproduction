@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import "../app/globals.css";
 import React from "react";
 import Sidebar from "@/Component/Sidebar";
+import Link from "next/link";
 
 const statesList = [
   "Alabama",
@@ -256,6 +257,13 @@ const CarriersPage = () => {
               </option>
             ))}
           </select>
+          <Link href="/CreateCarrierPage">
+          <button
+            className="ml-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+          >
+            Create Carrier
+          </button>
+          </Link>
         </div>
       </div>
 

@@ -58,21 +58,24 @@ const CreateCarrierPage = () => {
   const handleRouteChange = (index, e) => {
     const { name, value } = e.target;
     const newRoutes = [...formData.carrier_routes];
+  
     if (name === 'states_covered') {
       const selectedState = value;
-      if (newRoutes[index][name].includes(selectedState)) {
-        newRoutes[index][name] = newRoutes[index][name].filter(state => state !== selectedState);
-      } else {
+  
+      // Add the state if not already in the array
+      if (!newRoutes[index][name].includes(selectedState)) {
         newRoutes[index][name] = [...newRoutes[index][name], selectedState];
       }
     } else {
       newRoutes[index][name] = value;
     }
+  
     setFormData(prevState => ({
       ...prevState,
       carrier_routes: newRoutes
     }));
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,6 +95,7 @@ const CreateCarrierPage = () => {
       const data = await response.json();
       console.log('Carrier created:', data);
       alert('Carrier created successfully!');
+      window.location.reload()
     } catch (error) {
       console.error('Error:', error);
       alert('There was an error creating the carrier.');

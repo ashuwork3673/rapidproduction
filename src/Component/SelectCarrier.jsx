@@ -70,6 +70,7 @@ const SelectCarriers = ({ quote_id }) => {
         const data = await response.json();
         setCarriers(data);
         setFilteredCarriers(data);
+        
       } catch (error) {
         console.error("Error fetching carrier data:", error);
       }
@@ -79,21 +80,23 @@ const SelectCarriers = ({ quote_id }) => {
   }, []);
 
   useEffect(() => {
+    let filtered = carriers;
+
     if (!selectedState1 && !selectedState2) {
-      // If both states are not selected, do not show any carriers
-      setFilteredCarriers([]);
+      filtered = carriers;
     } else {
-      // Filter carriers based on selected states
-      let filtered = carriers.filter((carrier) =>
+      filtered = carriers.filter((carrier) =>
         carrier.carrier_routes.some(
           (route) =>
-            (selectedState1 && route.states_covered.includes(selectedState1)) ||
-            (selectedState2 && route.states_covered.includes(selectedState2))
+            selectedState1 &&
+            route.states_covered.includes(selectedState1) &&
+            selectedState2 &&
+            route.states_covered.includes(selectedState2)
         )
       );
-
-      setFilteredCarriers(filtered);
     }
+
+    setFilteredCarriers(filtered);
   }, [selectedState1, selectedState2, carriers]);
 
   const handleSelectCarrier = async (carrier) => {
@@ -121,6 +124,7 @@ const SelectCarriers = ({ quote_id }) => {
 
       const data = await response.json();
       alert("Carrier added successfully!");
+      window.location.reload()
     } catch (error) {
       console.error("Error adding carrier:", error);
       alert("Error adding carrier. Please check your input or try again later.");
@@ -128,10 +132,10 @@ const SelectCarriers = ({ quote_id }) => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-auto">
       <div className="max-w-7xl container mx-auto p-6">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Carriers List
+          Select Carrier for Shipping
         </h1>
 
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
@@ -178,7 +182,7 @@ const SelectCarriers = ({ quote_id }) => {
           <table className="w-full text-sm text-left border-collapse">
             <thead className="bg-blue-600 text-white">
               <tr>
-                <th>Quote Id</th>
+               
                 <th className="p-4">Carrier Name</th>
                 <th className="p-4">States Covered</th>
                 <th className="p-4">Action</th>
@@ -191,9 +195,7 @@ const SelectCarriers = ({ quote_id }) => {
                     key={index}
                     className="odd:bg-gray-50 even:bg-white hover:bg-gray-100"
                   >
-                    <td className="p-4 font-medium">
-                      <b>{quote_id}</b>
-                    </td>
+                  
                     <td className="p-4 font-medium">
                       <b>{carrier.carrier_name}</b>
                     </td>

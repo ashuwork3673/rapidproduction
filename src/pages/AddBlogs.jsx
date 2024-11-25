@@ -57,7 +57,7 @@ const CreatePost = () => {
     <div className="flex h-screen">
       {/* sidebar  */}
       <Sidebar/>
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-4xl ">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
         Create New Post
       </h1>

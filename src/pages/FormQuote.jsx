@@ -1,26 +1,43 @@
 import { useState, useEffect } from "react";
-import { FaHome, FaFileAlt, FaClipboardList, FaBars, FaSearch } from "react-icons/fa";
-import Link from "next/link";
 import { useRouter } from "next/router";
+import { FaSearch } from "react-icons/fa";
 import axios from "axios";
 import "../app/globals.css";
 import "../styles/dashboard.css"
 import Sidebar from "@/Component/Sidebar";
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-/>
+import DashboardForm from "@/Component/DashboardForm";
+
+const Modal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-300 p-6 rounded-lg shadow-lg w-1/3">
+        <div className="flex justify-end space-x-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-red-400 text-black"
+          >
+            X
+          </button>
+        </div>
+        <DashboardForm />
+      </div>
+    </div>
+  );
+};
 
 const FormQuote = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [forms, setForms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(7);
-  const [emailStatus, setEmailStatus] = useState("");
-  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [clickedForms, setClickedForms] = useState([]); // Track clicked forms
   const router = useRouter();
 
-  // Fetch and sort form data by quote_id in descending order
   const fetchForms = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/form");
@@ -31,11 +48,25 @@ const FormQuote = () => {
     }
   };
 
+  // Retrieve clicked forms from localStorage on component mount
   useEffect(() => {
+    const storedClickedForms = localStorage.getItem("clickedForms");
+    if (storedClickedForms) {
+      setClickedForms(JSON.parse(storedClickedForms));
+    }
     fetchForms();
   }, []);
 
-  // Filter forms based on search query
+  const handleFormClick = (form) => {
+    // Mark form as clicked and persist it in localStorage
+    if (!clickedForms.includes(form._id)) {
+      const updatedClickedForms = [...clickedForms, form._id];
+      setClickedForms(updatedClickedForms);
+      localStorage.setItem("clickedForms", JSON.stringify(updatedClickedForms));
+    }
+    router.push(`/QuoteDetails?id=${form._id}`);
+  };
+
   const filteredForms = forms.filter((form) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -58,94 +89,93 @@ const FormQuote = () => {
 
   const totalPages = Math.ceil(filteredForms.length / itemsPerPage);
 
-  const handleFormClick = (form) => {
-    // Store form's quote_id in localStorage when clicked
-    let clickedForms = JSON.parse(localStorage.getItem("clickedForms")) || [];
-    if (!clickedForms.includes(form.quote_id)) {
-      clickedForms.push(form.quote_id);
-      localStorage.setItem("clickedForms", JSON.stringify(clickedForms));
-    }
-
-    // Redirect to the details page
-    router.push(`/QuoteDetails?id=${form._id}`);
-  };
-
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Determine if the form is new (for example, created within the last 24 hours)
-  const isNewForm = (createdAt) => {
-    const currentDate = new Date();
-    const formDate = new Date(createdAt);
-    const timeDifference = currentDate - formDate;
-    const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
-    return timeDifference < oneDayInMilliseconds;
+  const openModal = () => {
+    setIsModalOpen(true);
   };
 
-  // Check if a form's quote_id exists in localStorage (indicating it's been clicked)
-  const isClicked = (quoteId) => {
-    const clickedForms = JSON.parse(localStorage.getItem("clickedForms")) || [];
-    return clickedForms.includes(quoteId);
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
-      <div className="flex-1 p-6 mt-14">
-        {/* Search Bar */}
-        <div className="mb-4 w-full mt-2  center-space flex">
-          {/* Search Bar with Icon inside */}
-          <div className="relative  w-6/12">
+      <div className="flex-1 p-6 mt-20">
+        <div className="mb-4 flex items-center">
+          <div className="relative flex-grow">
             <input
               type="text"
-              className="p-2 pl-10 w-full  border border-gray-300 rounded-md"
-              placeholder="Search..."
+              className="p-2 pl-10 w-full bg-gray-100 border border-gray-300 rounded-md"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
             />
-            {/* Search Icon inside input */}
-            <FaSearch className="absolute left-3 top-1/2 transform-translate-y-1/2 text-gray-600" />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
 
-          {/* Add Quotes Button */}
           <button
-            className=" px-4 py-2 button-color text-white rounded-md hover:bg-blue-700"
-            onClick={() => console.log("Add Quotes clicked")}
+            onClick={openModal}
+            className="ml-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
           >
-            Add Quotes
+            Add Quote
           </button>
         </div>
 
-
-        {/* Display email status */}
-        {emailStatus && <div className="mt-4 text-green-500 font-semibold">{emailStatus}</div>}
-
-        {/* Table to display form quotes */}
         <div className="mt-4 overflow-x-auto bg-white shadow-md rounded-lg">
           <table className="min-w-full table-auto border-collapse border border-gray-300 rounded-lg">
             <thead>
-              <tr className="accent-bg ttext-white">
-                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Quote ID</th>
-                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Name</th>
-                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Email</th>
-                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Status</th>
-                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">Details</th>
+              <tr className="bg-indigo-600 text-white">
+                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
+                  Quote ID
+                </th>
+                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
+                  Pickup Date
+                </th>
+                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
+                  Pickup Id
+                </th>
+                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
+                  Time
+                </th>
+                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {currentForms.map((form, index) => (
                 <tr
-                  key={form.id}
+                  key={form._id}
                   onClick={() => handleFormClick(form)}
-                  className={`cursor-pointer hover:bg-indigo-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                    } ${isNewForm(form.createdAt) ? "bg-yellow-100" : ""} ${!isClicked(form.quote_id) ? "bg-red-100" : ""
-                    }`} // Apply red background to the entire row if not clicked
+                  className={`cursor-pointer hover:bg-indigo-50 ${
+                    clickedForms.includes(form._id)
+                      ? index % 2 === 0
+                        ? "bg-white"
+                        : "bg-gray-100"
+                      : "bg-red-100"
+                  }`}
                 >
-                  <td className="px-6 py-4 border-b border-gray-200">{form.quote_id}</td>
-                  <td className="px-6 py-4 border-b border-gray-200">{form.username}</td>
-                  <td className="px-6 py-4 border-b border-gray-200">{form.email}</td>
+                  <td className="px-6 py-4 border-b border-gray-200">
+                    {form.quote_id}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200">
+                    {form.username}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200">
+                    {new Date(form.pickup_date).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200">
+                    {form.pickup_id}
+                  </td>
+                  <td className="px-6 py-4 border-b border-gray-200">
+                    {form.added_on}
+                  </td>
                   <td className="px-6 py-4 border-b border-gray-200">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${form.status === "Done"
@@ -160,19 +190,12 @@ const FormQuote = () => {
                       {form.status}
                     </span>
                   </td>
-                  <td
-                    className={`px-6 py-4 text-indigo-600 font-bold underline ${isClicked(form.quote_id) ? "" : "bg-red-100"
-                      }`}
-                  >
-                    Details
-                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {/* Pagination Controls */}
-          <div className="mt-4 flex p-4 justify-center space-x-2">
+          <div className="mt-4 flex justify-center space-x-2">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
@@ -184,7 +207,11 @@ const FormQuote = () => {
               <button
                 key={index}
                 onClick={() => handlePageChange(index + 1)}
-                className={`px-4 py-2 rounded-md ${currentPage === index + 1 ? "button-color text-white" : "bg-white text-indigo-600"}`}
+                className={`px-4 py-2 rounded-md ${
+                  currentPage === index + 1
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white text-indigo-600"
+                }`}
               >
                 {index + 1}
               </button>
@@ -199,6 +226,8 @@ const FormQuote = () => {
           </div>
         </div>
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 };
