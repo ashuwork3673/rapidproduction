@@ -5,6 +5,7 @@ import "../app/globals.css";
 import "../styles/dashboard.css";
 import dayjs from "dayjs";
 import Sidebar from "@/Component/Sidebar";
+import withAuth from "@/Component/withAuth";
 
 // Dynamic import of charts with SSR disabled
 const BarChart = dynamic(
@@ -255,4 +256,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default withAuth(Dashboard);

@@ -6,6 +6,7 @@ import "../app/globals.css";
 import "../styles/dashboard.css"
 import Sidebar from "@/Component/Sidebar";
 import DashboardForm from "@/Component/DashboardForm";
+import withAuth from "@/Component/withAuth";
 
 const Modal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -232,4 +233,4 @@ const FormQuote = () => {
   );
 };
 
-export default FormQuote;
+export default withAuth(FormQuote);

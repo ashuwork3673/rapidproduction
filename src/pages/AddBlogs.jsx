@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import "../app/globals.css";
 import MyEditorComponent from "@/Component/custom-editor";
 import Sidebar from "@/Component/Sidebar";
+import withAuth from "@/Component/withAuth";
 
 const CreatePost = () => {
   const [title, setTitle] = useState("");
@@ -204,4 +205,4 @@ const CreatePost = () => {
     );
 };
 
-export default CreatePost;
+export default withAuth(CreatePost);

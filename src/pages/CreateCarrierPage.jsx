@@ -2,6 +2,7 @@
 import Sidebar from '@/Component/Sidebar';
 import { useState } from 'react';
 import '../app/globals.css';
+import withAuth from "@/Component/withAuth";
 
 const statesList = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
@@ -291,4 +292,4 @@ const CreateCarrierPage = () => {
   );
 };
 
-export default CreateCarrierPage;
+export default withAuth(CreateCarrierPage);

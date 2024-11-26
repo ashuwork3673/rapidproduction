@@ -5,7 +5,7 @@ import "../app/globals.css";
 import React from "react";
 import Sidebar from "@/Component/Sidebar";
 import Link from "next/link";
-
+import withAuth from "@/Component/withAuth";
 const statesList = [
   "Alabama",
   "Alaska",
@@ -554,4 +554,4 @@ const CarriersPage = () => {
   );
 };
 
-export default CarriersPage;
+export default withAuth(CarriersPage);
