@@ -1,148 +1,132 @@
 import React, { useState } from "react";
-import { FaHome, FaFileAlt, FaClipboardList, FaBars } from "react-icons/fa";
+import { FaBars } from "react-icons/fa";
 import Link from "next/link";
 
-function ResponsiveSidebar() {
-    const styles = {
-        container: {
-          display: "flex",
-          flexDirection: "row",
-          alignItems:"center"
+function ResponsiveNavbar() {
+  const styles = {
+    navbar: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      backgroundColor: "#1a2d43",
+      color: "white",
+      zIndex: 1000,
+      padding: "10px 20px",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    logo: {
+      fontSize: "1.2rem",
+      fontWeight: "bold",
+    },
+    menu: {
+      listStyle: "none",
+      padding: 0,
+      margin: 0,
+      display: "flex",
+      gap: "20px",
+    },
+    menuItem: {
+      textDecoration: "none",
+      color: "white",
+      fontSize: "1.2rem",
+    },
+    dropdownMenu: {
+      listStyle: "none",
+      padding: 0,
+      margin: 0,
+      backgroundColor: "#1a2d43",
+      position: "absolute",
+      top: "60px",
+      left: "0",
+      width: "100%",
+      textAlign: "center",
+      display: "none", // Hidden by default
+      flexDirection: "column",
+      gap: "10px",
+    },
+    dropdownItem: {
+      textDecoration: "none",
+      color: "white",
+      padding: "10px",
+      display: "block",
+    },
+  };
 
-         
-        },
-        /* Sidebar (large screens) */
-        sidebarLarge: {
-          display: "none",
-          flexDirection: "column",
-          width: "250px",
-          backgroundColor: "#1a2d43",
-          color: "white",
-          padding: "20px",
-          height: "100vh",
-        },
-        logo: {
-          fontSize: "1.5rem",
-          fontWeight: "bold",
-          marginBottom: "20px",
-        },
-        menu: {
-          listStyle: "none",
-          padding: 0,
-        },
-        menuItem: {
-          marginBottom: "15px",
-        },
-        link: {
-          display: "flex",
-          alignItems: "center",
-          textDecoration: "none",
-          color: "white",
-          padding: "10px 15px",
-          borderRadius: "5px",
-          transition: "background-color 0.3s",
-        },
-        linkHover: {
-          backgroundColor: "#ff007b",
-        },
-        icon: {
-          marginRight: "10px",
-          fontSize: "1.2rem",
-        },
-        text: {
-          fontSize: "1rem",
-        },
-      
-        /* Navbar (small screens) */
-        navbarSmall: {
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          backgroundColor: "#1a2d43",
-          color: "white",
-          zIndex: 50,
-        },
-        navbarHeader: {
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "10px 20px",
-        },
-        toggleButton: {
-          backgroundColor: "#007aff",
-          color: "white",
-          padding: "10px",
-          borderRadius: "5px",
-          border: "none",
-          cursor: "pointer",
-        },
-        navbarMenu: {
-          listStyle: "none",
-          padding: 0,
-          backgroundColor: "#1a2d43",
-        },
-        /* Main Content */
-        content: {
-          flexGrow: 1,
-          backgroundColor: "#f0f0f0",
-          padding: "20px",
-          marginLeft: "250px", // Matches sidebar width
-        },
-        heading: {
-          color: "#1a2d43",
-          fontSize: "2rem",
-        },
-        paragraph: {
-          marginTop: "10px",
-          color: "#333",
-        },
-      };
-      
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
 
   return (
-    <div style={styles.container}>
-      {/* Sidebar for large screens */}
-     
+    <nav style={styles.navbar}>
+      <h2 style={styles.logo}>Rapid Auto Shipping</h2>
 
-      {/* Navbar for small screens */}
-      <div style={styles.navbarSmall}>
-        <div style={styles.navbarHeader}>
-          <h2 style={styles.logo}>Rapid Auto Shipping</h2>
-          <button onClick={toggleSidebar} style={styles.toggleButton}>
-            <FaBars />
-          </button>
-        </div>
-        {isSidebarOpen && (
-          <ul style={styles.navbarMenu}>
-            <li style={styles.menuItem}>
-              <Link href="/Dashboard" style={styles.link} onClick={toggleSidebar}>
-                <FaHome style={styles.icon} />
-                <span style={styles.text}>Dashboard</span>
-              </Link>
-            </li>
-            <li style={styles.menuItem}>
-              <Link href="/FormQuote" style={styles.link} onClick={toggleSidebar}>
-                <FaFileAlt style={styles.icon} />
-                <span style={styles.text}>Form Quote</span>
-              </Link>
-            </li>
-          <li style={styles.menuItem}>
-              <Link href="/CarriersPage" style={styles.link} onClick={toggleSidebar}>
-                <FaClipboardList style={styles.icon} />
-                <span style={styles.text}>Carriers List</span>
-              </Link>
-            </li>
-          </ul>
-        )}
-      </div>
+      {/* Inline menu for larger screens */}
+      <ul
+        className={`menu-large ${isDropdownOpen ? "show-mobile-menu" : ""}`}
+        style={{
+          ...styles.menu,
+          display: isDropdownOpen ? "flex" : "",
+          flexDirection: isDropdownOpen ? "column" : "",
+          gap: isDropdownOpen ? "10px" : "",
+        }}
+      >
+        <li>
+          <Link href="/Dashboard" style={styles.menuItem}>
+            Dashboard
+          </Link>
+        </li>
+        <li>
+          <Link href="/FormQuote" style={styles.menuItem}>
+            Form Quote
+          </Link>
+        </li>
+        <li>
+          <Link href="/CarriersPage" style={styles.menuItem}>
+            Carriers List
+          </Link>
+        </li>
+      </ul>
 
-     
-    </div>
+      {/* Toggle button for smaller screens */}
+      <button
+        onClick={toggleDropdown}
+        className="toggle-btn"
+        style={styles.toggleButton}
+      >
+        <FaBars />
+      </button>
+
+      {/* CSS for responsiveness */}
+      <style jsx>{`
+        
+        @media (min-width: 768px) {
+          .menu-large {
+            display: flex; /* Show menu items inline */
+            gap:3%;
+            width:50%;
+            justify-content:flex-end;
+            
+          }
+          .toggle-btn {
+            display: none; /* Hide toggle button */
+          }
+        }
+        @media (max-width: 767px) {
+          .menu-large {
+            display: none; /* Hide menu by default */
+          }
+          .toggle-btn {
+            display: block; /* Show toggle button */
+          }
+          .show-mobile-menu {
+            display: flex; /* Show menu in mobile view */
+          }
+        }
+      `}</style>
+    </nav>
   );
 }
 
-export default ResponsiveSidebar;
+export default ResponsiveNavbar;
