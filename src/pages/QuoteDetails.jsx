@@ -189,6 +189,7 @@ const QuoteDetails = () => {
   };
 
   const handleUpdateForm = async () => {
+  const handleUpdateForm = async () => {
     try {
       // Prepare the updated data, fallback to the existing form values if not changed
       const updatedData = {
@@ -210,12 +211,14 @@ const QuoteDetails = () => {
         note: note || form.note,
         note_time: note ? new Date().toISOString() : form.note_time,
         status: status || form.status,
+        status: status || form.status,
       };
 
       // Axios PUT request to update the form
       await axios.put(`http://localhost:5000/api/form/${id}, updatedData`);
 
       alert("Form updated successfully");
+      window.location.reload();
       window.location.reload();
     } catch (error) {
       console.error("Error updating form:", error);
