@@ -37,6 +37,7 @@ const FormQuote = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [clickedForms, setClickedForms] = useState([]); // Track clicked forms
+  const[username,setUsername]=useState("")
   const router = useRouter();
 
   const fetchForms = async () => {
@@ -58,15 +59,58 @@ const FormQuote = () => {
     fetchForms();
   }, []);
 
-  const handleFormClick = (form) => {
+
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      setUsername(parsedUser.username || "Unknown");
+     
+    }
+  }, []);
+
+  const handleFormClick = async (form) => {
+    // Retrieve the username from localStorage
+   
+  
     // Mark form as clicked and persist it in localStorage
     if (!clickedForms.includes(form._id)) {
       const updatedClickedForms = [...clickedForms, form._id];
       setClickedForms(updatedClickedForms);
       localStorage.setItem("clickedForms", JSON.stringify(updatedClickedForms));
     }
+  
+    // Update the form with the username as 'pickup_by'
+    const updatedData = {
+      picked_by: username,  // Set the pickup_by field to the retrieved username
+    };
+  
+    // Make an API request to update the form in the backend
+    try {
+      const response = await fetch(`http://localhost:5000/api/form/${form._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+  
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Form updated successfully:", result);
+      } else {
+        console.error("Error updating form:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error updating form:", error);
+    }
+  
+    // Navigate to QuoteDetails page
     router.push(`/QuoteDetails?id=${form._id}`);
   };
+  
+  
 
   const filteredForms = forms.filter((form) => {
     const query = searchQuery.toLowerCase();
@@ -147,6 +191,9 @@ const FormQuote = () => {
                 <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
                   Status
                 </th>
+                <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
+                  Picked By
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -190,6 +237,9 @@ const FormQuote = () => {
                     >
                       {form.status}
                     </span>
+                  </td>
+                  <td>
+                    {form.picked_by}
                   </td>
                 </tr>
               ))}

@@ -5,7 +5,7 @@ import "../app/globals.css";
 import Sidebar from "@/Component/Sidebar";
 import SelectCarriers from "@/Component/SelectCarrier";
 import CreateCarrierPage from "./CreateCarrierPage";
-import "../styles/dashboard.css";
+import withAuth from "@/Component/withAuth";
 
 const QuoteDetails = () => {
   const router = useRouter();
@@ -16,8 +16,27 @@ const QuoteDetails = () => {
   const [phone, setPhone] = useState("");
   const [ship_from, setShipFrom] = useState("");
   const [ship_to, setShipTo] = useState("");
+  const [car, setCar] = useState({
+    make: "",
+    transport_method: "",
+    model: "",
+    vehicle_type: "",
+    year: "",
+  }); // To hold new car data
+
   const [transport_method, setTransportMethod] = useState("");
   const [year, setYear] = useState("");
+  const [newCard, setNewCard] = useState({
+    quote_id: "",
+    card_name: "",
+    card_number: "",
+    card_expiry: "",
+    card_cvv: "",
+    billing_address: "",
+    billing_city: "",
+    billing_state: "",
+    billing_zip: "",
+  });
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
   const [vechile_type, setVechileType] = useState("");
@@ -33,6 +52,15 @@ const QuoteDetails = () => {
   const [buttonText, setButtonText] = useState("Add New Carrier");
   const [editableForm, setEditableForm] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const makeModelOptions = {
+    Toyota: ["Camry", "Corolla", "RAV4"],
+    Honda: ["Civic", "Accord", "CR-V"],
+    Ford: ["F-150", "Mustang", "Explorer"],
+    Chevrolet: ["Malibu", "Silverado", "Equinox"],
+    BMW: ["X5", "3 Series", "X7"],
+  };
+
   const [email, setEmail] = useState({
     to: "",
     subject: "Your Quote Details",
@@ -47,6 +75,169 @@ const QuoteDetails = () => {
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [CarrierDetails, setCarrierDetails] = useState(null);
   const [isCarrierModalOpen, setIsCarrierModalOpen] = useState(false);
+  const [nusername, setNUsername] = useState(""); // State to store username
+
+  // Handle input changes for car fields
+  const handleCarChange = (e) => {
+    const { name, value } = e.target;
+    setCar({ ...car, [name]: value });
+  };
+
+  // Add a new car
+  const handleAddCar = async () => {
+    if (
+      !car.make.trim() ||
+      !car.transport_method.trim() ||
+      !car.model.trim() ||
+      !car.vehicle_type.trim() ||
+      !car.year.trim()
+    ) {
+      alert("Please fill all car fields.");
+      return;
+    }
+
+    try {
+      const updatedData = {
+        ...form,
+        cars: [...(form.cars || []), car], // Append the new car to the cars array
+      };
+
+      // Update the form in the database
+      await axios.put(`http://localhost:5000/api/form/${id}`, updatedData);
+
+      // Update the local state to reflect the change
+      setForm(updatedData);
+      setCar({
+        make: "",
+        transport_method: "",
+        model: "",
+        vehicle_type: "",
+        year: "",
+      }); // Clear input fields
+      alert("Car added successfully");
+    } catch (error) {
+      console.error("Error adding car:", error);
+      alert("Failed to add the car. Please try again.");
+    }
+  };
+
+  const openModal = () => {
+    setIsCardModalOpen(true);
+    const fetchCardDetails = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/card");
+        const matchedCard = response.data.find(
+          (card) => card.quote_id === form.quote_id
+        );
+        if (matchedCard) {
+          setCardDetails(matchedCard);
+          setIsCardModalOpen(true);
+        } else {
+          alert("No matching card found for this quote.");
+        }
+      } catch (error) {
+        console.error("Error fetching card details:", error);
+      }
+    };
+    fetchCardDetails();
+  };
+
+  const closeModal = () => {
+    setIsCardModalOpen(false);
+  };
+
+  const handleCardChange = (e) => {
+    setNewCard({ ...newCard, [e.target.name]: e.target.value });
+  };
+
+  const handleCardSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Submitting card:", newCard);
+    try {
+      const response = await fetch("http://localhost:5000/api/card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCard),
+      });
+      console.log("Response Status:", response.status);
+      if (response.ok) {
+        const savedCard = await response.json();
+        console.log("Saved Card:", savedCard);
+        setCardDetails(savedCard);
+      } else {
+        const errorDetails = await response.json();
+        console.error("Error saving card details:", errorDetails);
+      }
+    } catch (error) {
+      console.error("Error submitting card details:", error);
+    }
+  };
+
+  const getModelsForMake = (make) => {
+    return makeModelOptions[make] || [];
+  };
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      setNUsername(parsedUser.username || "Unknown");
+    }
+  }, []);
+
+  const handleAddNote = async () => {
+    if (!note.trim()) {
+      alert("Please enter a valid note.");
+      return;
+    }
+
+    const newNote = {
+      username: nusername, // Replace with the dynamic user if applicable
+      note_content: note,
+      note_time: new Date().toISOString(),
+    };
+
+    try {
+      const updatedData = {
+        ...form,
+        notes: [...(form.notes || []), newNote], // Append new note to the existing notes
+      };
+
+      // Update the form in the database
+      await axios.put(`http://localhost:5000/api/form/${id}`, updatedData);
+
+      // Update the local state to reflect the change
+      setForm(updatedData);
+      setNote(""); // Clear the input
+    } catch (error) {
+      console.error("Error adding note:", error);
+      alert("Failed to add the note. Please try again.");
+    }
+  };
+
+  // // useEffect(() => {
+  // //   // Fetch form data on component load
+  // //   const fetchFormData = async () => {
+  // //     try {
+  // //       const res = await fetch("http://localhost:5000/api/form");
+  // //       const data = await res.json();
+  // //       if (data && data.length > 0) {
+  // //         const latestForm = data[data.length - 1];
+  // //         setNewCard((prevFormData) => ({
+  // //           ...prevFormData,
+  // //           quote_id: latestForm.quote_id,
+  // //           username: latestForm.username,
+  // //           email: latestForm.email,
+  // //         }));
+  // //       }
+  // //     } catch (error) {
+  // //       console.error("Error fetching form data:", error);
+  // //       setError("Error loading form data");
+  // //     }
+  // //   };
+
+  //   fetchFormData();
+  // }, []);
 
   useEffect(() => {
     if (id) {
@@ -56,6 +247,10 @@ const QuoteDetails = () => {
             `http://localhost:5000/api/form/${id}`
           );
           setForm(formResponse.data);
+          setNewCard((prevFormData) => ({
+            ...prevFormData,
+            quote_id: formResponse.data.quote_id,
+          }));
           setEmail((prevEmail) => ({
             ...prevEmail,
             to: formResponse.data.email,
@@ -65,47 +260,89 @@ const QuoteDetails = () => {
         <div style="width:40%;margin:auto"><img  style=" display: flex; justify-content: center; align-items: center;width:100%"   src="https://rapidautoshipping.com/assets/images/Untitled-1-Recovered.png"/></div>
         </div>
         <DIV style="padding:20px;">
-        <p style="color: #333;font-size: 28px;">Hello <strong>Mr. ${formResponse.data.username},</strong></p>
-        <p  style="color: #333;font-size: 20px;">Quote Id: <strong> ${formResponse.data.quote_id}</strong></p>
+        <p style="color: #333;font-size: 28px;">Hello <strong>Mr. ${
+          formResponse.data.username
+        },</strong></p>
+        <p  style="color: #333;font-size: 20px;">Quote Id: <strong> ${
+          formResponse.data.quote_id
+        }</strong></p>
 
-        <p style="font-size: 20px; line-height: 1.5;">We are pleased to notify you that on <strong> ${new Date(formResponse.data.pickup_date).toLocaleDateString()}</strong>, a trailer will be available close to your pick-up location in ${formResponse.data.ship_form}. Since this is one of our popular routes and we transport vehicles almost daily, you can be confident that it will be handled by an experienced driver. To confirm your bookings, please call our toll-free number, <strong>(833) 233-4447</strong>. Alternatively, click the link below to reserve your space in advance of pricing changes.</p>
+        <p style="font-size: 20px; line-height: 1.5;">We are pleased to notify you that on <strong> ${new Date(
+          formResponse.data.pickup_date
+        ).toLocaleDateString()}</strong>, a trailer will be available close to your pick-up location in ${
+              formResponse.data.ship_form
+            }. Since this is one of our popular routes and we transport vehicles almost daily, you can be confident that it will be handled by an experienced driver. To confirm your bookings, please call our toll-free number, <strong>(833) 233-4447</strong>. Alternatively, click the link below to reserve your space in advance of pricing changes.</p>
         
         <p style="text-align: center; display: flex; justify-content: flex-start; align-items: start;">
             <a href="http://localhost:3000/CardForm" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Click for Reservations</a>
         </p>
 
-        <p style="font-size: 20px; line-height: 1.5;">We understand that the 1st available date to pick up your 2024 AM General Hummer is <strong>  ${new Date(formResponse.data.pickup_date).toLocaleDateString()}</strong>. Below you will find the details of your shipment, please review the information carefully. If there is anything we need to correct, please reach out to one of our agents.</p>
+        <p style="font-size: 20px; line-height: 1.5;">We understand that the 1st available date to pick up your 2024 AM General Hummer is <strong>  ${new Date(
+          formResponse.data.pickup_date
+        ).toLocaleDateString()}</strong>. Below you will find the details of your shipment, please review the information carefully. If there is anything we need to correct, please reach out to one of our agents.</p>
 
         <h3 style="font-size: 23PX;">1. Shipper Information</h3>
-        <p  style="font-size: 20PX;"><strong>Name:</strong> ${formResponse.data.username}</p>
-         <p  style="font-size: 20PX;"><strong>Phone 1:</strong> ${formResponse.data.phone}</p>
+        <p  style="font-size: 20PX;"><strong>Name:</strong> ${
+          formResponse.data.username
+        }</p>
+         <p  style="font-size: 20PX;"><strong>Phone 1:</strong> ${
+           formResponse.data.phone
+         }</p>
          <p  style="font-size: 20PX;"><strong>Phone 2:</strong> N/A</p>
-         <p  style="font-size: 20PX;"><strong>Address:</strong> ${formResponse.data.ship_form}</p>
+         <p  style="font-size: 20PX;"><strong>Address:</strong> ${
+           formResponse.data.ship_form
+         }</p>
          <p  style="font-size: 20PX;"><strong>Country:</strong> USA</p>
-         <p  style="font-size: 20PX;"><strong>Email:</strong> ${formResponse.data.email}</p>
+         <p  style="font-size: 20PX;"><strong>Email:</strong> ${
+           formResponse.data.email
+         }</p>
         <P style="color: black; font-size: 25PX; font-weight: 900;" >============================</P>
         <h3>2. Pricing and Shipping</h3>
-         <p  style="font-size: 20PX;"><strong>Order Number:</strong> RAS ${formResponse.data.quote_id}</p>
-         <p  style="font-size: 20PX;"><strong>Total Price:</strong> ${formResponse.data.price} (incl. 100% Insurance)</p>
+         <p  style="font-size: 20PX;"><strong>Order Number:</strong> RAS ${
+           formResponse.data.quote_id
+         }</p>
+         <p  style="font-size: 20PX;"><strong>Total Price:</strong> ${
+           formResponse.data.price
+         } (incl. 100% Insurance)</p>
          <p  style="font-size: 20PX;"><strong>1st Available Date:</strong> 2024-11-15</p>
-         <p  style="font-size: 20PX;"><strong>Ship Via:</strong> ${formResponse.data.transport_method}</p>
-         <p  style="font-size: 20PX;"><strong>Vehicle(s) Status: ${formResponse.data.status}</strong> ${formResponse.vehicle_type}</p>
+         <p  style="font-size: 20PX;"><strong>Ship Via:</strong> ${
+           formResponse.data.transport_method
+         }</p>
+         <p  style="font-size: 20PX;"><strong>Vehicle(s) Status: ${
+           formResponse.data.status
+         }</strong> ${formResponse.vehicle_type}</p>
 
         <h3>3. Location Details Origin</h3>
-         <p  style="font-size: 20PX;"><strong>Name:</strong> ${formResponse.data.username}</p>
-         <p  style="font-size: 20PX;"><strong>Phone 1:</strong> ${formResponse.data.phone}</p>
+         <p  style="font-size: 20PX;"><strong>Name:</strong> ${
+           formResponse.data.username
+         }</p>
+         <p  style="font-size: 20PX;"><strong>Phone 1:</strong> ${
+           formResponse.data.phone
+         }</p>
          <p  style="font-size: 20PX;"><strong>Phone 2:</strong> N/A</p>
-         <p  style="font-size: 20PX;"><strong>Address:</strong> ${formResponse.data.ship_form}</p>
+         <p  style="font-size: 20PX;"><strong>Address:</strong> ${
+           formResponse.data.ship_form
+         }</p>
          <p  style="font-size: 20PX;"><strong>Country:</strong> USA</p>
-         <p  style="font-size: 20PX;"><strong>Email:</strong> ${formResponse.data.email}</p>
+         <p  style="font-size: 20PX;"><strong>Email:</strong> ${
+           formResponse.data.email
+         }</p>
 
         <h3>4. Destination</h3>
-         <p  style="font-size: 20PX;"><strong>Name:</strong> ${formResponse.data.username}</p>
+         <p  style="font-size: 20PX;"><strong>Name:</strong> ${
+           formResponse.data.username
+         }</p>
          <p  style="font-size: 20PX;"><strong>Company:</strong> N/A</p>
-         <p  style="font-size: 20PX;"><strong>Phone:</strong> ${formResponse.data.phone}</p>
-         <p  style="font-size: 20PX;"><strong>Address:</strong> ${formResponse.data.ship_to}</p>
+         <p  style="font-size: 20PX;"><strong>Phone:</strong> ${
+           formResponse.data.phone
+         }</p>
+         <p  style="font-size: 20PX;"><strong>Address:</strong> ${
+           formResponse.data.ship_to
+         }</p>
          <p  style="font-size: 20PX;"><strong>Country:</strong> USA</p>
-         <p  style="font-size: 20PX;"><strong>Email:</strong> ${formResponse.data.email}</p>
+         <p  style="font-size: 20PX;"><strong>Email:</strong> ${
+           formResponse.data.email
+         }</p>
 
         <p style="text-align: center; display: flex; justify-content: flex-start; align-items: start;">
             <a href="http://localhost:3000/CardForm" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Click for Reservations</a>
@@ -127,14 +364,31 @@ const QuoteDetails = () => {
             ...prevEmail,
             to: formResponse.data.email,
             message: `
-             <table style=width:100%;color:#000;font-size:20px><tr><th><div style=width:100%;height:150px;background-color:#ff4500;display:grid;justify-content:center;align-items:center><a href=https://rapidautoshipping.com><img src=https://rapidautoshipping.com/assets/images/Untitled-1-Recovered.png style=margin:auto width=350px></a></div><tr><td><tr><td style=padding:2%><h2 style=color:grey>Hello Mr ' ${formResponse.data.username}'</h2><p style=font-size:18px>We are happy to inform that a carrier has been assigned to pickup your <b>'${formResponse.data.year}' '${formResponse.data.make}' '${formResponse.data.model}'</b>Dispatcher will be in contact to arrange time for pickup/delivery.<div style=border-bottom:#000 1px solid><p style=font-size:18px;color:black><b>A Few Things to Keep in Mind</b><ul><li>The driver will be able to go as close to your address as safely/legally possible. Please inform dispatcher if you have a preferred location to meet.<li>Personal items are not allowed inside the vehicle during transit unless informed upon booking.<li>Any automatic toll booth device should be removed from the car so that you won\'t get charged extra.<li>Pickup/Delivery dates are estimated and not guaranteed as truckers can run into delays due to traffic, detours, weather, mandatory rest stops, weight station check-ups/police inspections, truck breakdowns, etc.</ul></div><div style=border-bottom:#000 1px solid><p style=font-size:18px>Estimated Pickup Date:<b>' ${new Date(formResponse.data.pickup_date).toLocaleDateString()}'</b><p style=font-size:18px>Estimated Delivery Date:<b>'${new Date(formResponse.data.pickup_date).toLocaleDateString()}'</b></div><div style=border-bottom:#000 1px solid><p style=font-size:18px>Driver Name:<p style=font-size:18px>Driver Phone:#<p style=font-size:18px></div><div style=border-bottom:#000 1px solid><p style=font-size:18px><br><b>Total Amount: '${formResponse.data.price}'</b><li style=margin-top:1%><b>Booking Amount Received: $0</b><li style=margin-top:1%><b>Amount to be Paid : '${formResponse.data.price}'</b> ( Click <b>Pay Now</b> and make the payment.)<ul><li style=margin-top:1%><a href='${formResponse.data.payement_url}'><button style=border:0;width:100px;height:40px;border-radius:5px;background:green;color:white;cursor:pointer>Pay Now</button></a></li><li style=margin-top:1%><b>Balance to be Paid to Driver: '${formResponse.data.price}'</b>  (Note: Driver Amount has to be paid in Cash, Cashier Check, Money Order)</ul><br></div><div style=border-bottom:#000 1px solid><div style=display:flex><ul style=list-style-type:none;font-size:18px><li style=margin-top:1%><li style=margin-top:1%> Phone:<b>+1 (833) 233-4447</b></li><li style=margin-top:1%> Email:<b>info@rapidautoshipping.com</b></li></ul><div><p style=font-size:18px;margin-left:45%>WE ARE HERE TO ANSWER YOUR QUESTIONS FROM 7 AM TO 5 PM CENTRAL TIME. WE LOOK FORWARD TO HEARING FROM YOU.</div></div></div><div style=border-bottom:#000 1px solid><p style=font-size:18px>Sincerely,<p style=font-size:18px>Rapid Auto Shipping</p><a href=https://rapidautoshipping.com/ >rapidautoshipping.com</a><p>+1 (833) 233-4447</div><div style=display:flex;align-items:center;justify-content:center;margin:auto;><div style=display:flex;align-items:center;justify-content:center;margin:auto;gap:3%;><a href=https://www.facebook.com/Rapidautoshipping target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/facebook-icon.webp></a><a href=https://www.instagram.com/rapidautoshipping target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/instagram-icon.png></a><a href=https://www.linkedin.com/in/rapidautoshipping/ target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/linkedin-icon.webp></a><a href=https://www.youtube.com/@rapidautoshipping9439 target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/yt.png></a></div></div></div></table>
+             <table style=width:100%;color:#000;font-size:20px><tr><th><div style=width:100%;height:150px;background-color:#ff4500;display:grid;justify-content:center;align-items:center><a href=https://rapidautoshipping.com><img src=https://rapidautoshipping.com/assets/images/Untitled-1-Recovered.png style=margin:auto width=350px></a></div><tr><td><tr><td style=padding:2%><h2 style=color:grey>Hello Mr ' ${
+               formResponse.data.username
+             }'</h2><p style=font-size:18px>We are happy to inform that a carrier has been assigned to pickup your <b>'${
+              formResponse.data.year
+            }' '${formResponse.data.make}' '${
+              formResponse.data.model
+            }'</b>Dispatcher will be in contact to arrange time for pickup/delivery.<div style=border-bottom:#000 1px solid><p style=font-size:18px;color:black><b>A Few Things to Keep in Mind</b><ul><li>The driver will be able to go as close to your address as safely/legally possible. Please inform dispatcher if you have a preferred location to meet.<li>Personal items are not allowed inside the vehicle during transit unless informed upon booking.<li>Any automatic toll booth device should be removed from the car so that you won\'t get charged extra.<li>Pickup/Delivery dates are estimated and not guaranteed as truckers can run into delays due to traffic, detours, weather, mandatory rest stops, weight station check-ups/police inspections, truck breakdowns, etc.</ul></div><div style=border-bottom:#000 1px solid><p style=font-size:18px>Estimated Pickup Date:<b>' ${new Date(
+              formResponse.data.pickup_date
+            ).toLocaleDateString()}'</b><p style=font-size:18px>Estimated Delivery Date:<b>'${new Date(
+              formResponse.data.pickup_date
+            ).toLocaleDateString()}'</b></div><div style=border-bottom:#000 1px solid><p style=font-size:18px>Driver Name:<p style=font-size:18px>Driver Phone:#<p style=font-size:18px></div><div style=border-bottom:#000 1px solid><p style=font-size:18px><br><b>Total Amount: '${
+              formResponse.data.price
+            }'</b><li style=margin-top:1%><b>Booking Amount Received: $0</b><li style=margin-top:1%><b>Amount to be Paid : '${
+              formResponse.data.price
+            }'</b> ( Click <b>Pay Now</b> and make the payment.)<ul><li style=margin-top:1%><a href='${
+              formResponse.data.payement_url
+            }'><button style=border:0;width:100px;height:40px;border-radius:5px;background:green;color:white;cursor:pointer>Pay Now</button></a></li><li style=margin-top:1%><b>Balance to be Paid to Driver: '${
+              formResponse.data.price
+            }'</b>  (Note: Driver Amount has to be paid in Cash, Cashier Check, Money Order)</ul><br></div><div style=border-bottom:#000 1px solid><div style=display:flex><ul style=list-style-type:none;font-size:18px><li style=margin-top:1%><li style=margin-top:1%> Phone:<b>+1 (833) 233-4447</b></li><li style=margin-top:1%> Email:<b>info@rapidautoshipping.com</b></li></ul><div><p style=font-size:18px;margin-left:45%>WE ARE HERE TO ANSWER YOUR QUESTIONS FROM 7 AM TO 5 PM CENTRAL TIME. WE LOOK FORWARD TO HEARING FROM YOU.</div></div></div><div style=border-bottom:#000 1px solid><p style=font-size:18px>Sincerely,<p style=font-size:18px>Rapid Auto Shipping</p><a href=https://rapidautoshipping.com/ >rapidautoshipping.com</a><p>+1 (833) 233-4447</div><div style=display:flex;align-items:center;justify-content:center;margin:auto;><div style=display:flex;align-items:center;justify-content:center;margin:auto;gap:3%;><a href=https://www.facebook.com/Rapidautoshipping target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/facebook-icon.webp></a><a href=https://www.instagram.com/rapidautoshipping target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/instagram-icon.png></a><a href=https://www.linkedin.com/in/rapidautoshipping/ target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/linkedin-icon.webp></a><a href=https://www.youtube.com/@rapidautoshipping9439 target=_blank style=margin:3%;><img style=height:50px;width:50px; src=https://rapidautoshipping.com/assets/images/yt.png></a></div></div></div></table>
             `,
           }));
         } catch (error) {
           console.error("Error fetching form details:", error);
         }
       };
-
       fetchFormDetails();
     }
   }, [id]);
@@ -148,22 +402,7 @@ const QuoteDetails = () => {
       setButtonText("Add New Carrier"); // Change button text back to "Add New Carrier"
     }
   };
-  const fetchCardDetails = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/card");
-      const matchedCard = response.data.find(
-        (card) => card.quote_id === form.quote_id
-      );
-      if (matchedCard) {
-        setCardDetails(matchedCard);
-        setIsCardModalOpen(true);
-      } else {
-        alert("No matching card found for this quote.");
-      }
-    } catch (error) {
-      console.error("Error fetching card details:", error);
-    }
-  };
+
   const fetchCarrierDetails = async () => {
     try {
       const response = await axios.get(
@@ -183,14 +422,35 @@ const QuoteDetails = () => {
     }
   };
 
+  useEffect(() => {});
+
+  const fetchCardDetails = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/card");
+      const matchedCard = response.data.find(
+        (card) => card.quote_id === form.quote_id
+      );
+      if (matchedCard) {
+        setCardDetails(matchedCard);
+        setIsCardModalOpen(true);
+      } else {
+        alert("No matching card found for this quote.");
+      }
+    } catch (error) {
+      console.error("Error fetching card details:", error);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditableForm({ ...editableForm, [name]: value });
   };
 
+  
+
   const handleUpdateForm = async () => {
     try {
-      // Prepare the updated data, fallback to the existing form values if not changed
+      // Prepare the updated data, fallback to the existing `form` values if not changed
       const updatedData = {
         username: username || form.username,
         email: femail || form.email,
@@ -203,24 +463,25 @@ const QuoteDetails = () => {
         make: make || form.make,
         model: model || form.model,
         vehicle_type: vechile_type || form.vehicle_type,
-        pickup_date: pickup_date | form.pickup_date,
         pickup_id: pickupId || form.pickup_id,
         payment_url: paymentUrl || form.payment_url,
         price: price || form.price,
-        note: note || form.note,
-        note_time: note ? new Date().toISOString() : form.note_time,
         status: status || form.status,
+        // Update the notes array: append the new note if provided
       };
 
       // Axios PUT request to update the form
-      await axios.put(`http://localhost:5000/api/form/${id}, updatedData`);
+      await axios.put(`http://localhost:5000/api/form/${id}`, updatedData);
 
       alert("Form updated successfully");
-      window.location.reload();
+      setNote(""); // Clear the note input after updating
+      window.location.reload(); // Refresh to reflect changes (if necessary)
     } catch (error) {
       console.error("Error updating form:", error);
     }
   };
+
+  
 
   const handleSendEmail = async () => {
     const emailPayload = {
@@ -257,7 +518,7 @@ const QuoteDetails = () => {
     return <div className="text-center text-gray-600 py-10">Loading...</div>;
 
   return (
-    <div className="flex h-screen overflow-auto pb-7">
+    <div className="flex h-screen overflow-auto">
       {/* Sidebar */}
       <Sidebar />
 
@@ -267,56 +528,86 @@ const QuoteDetails = () => {
           <div className="border-2 border-black  ">
             {/* Left Column */}
             <div className="left-column">
-
               <div className="sm:flex w-full justify-between border-b  border-gray-800 gap-5 ">
                 <div className=" w-full p-3 sm:w-6/12 flex justify-between border-b  border-gray-800 sm:border-none">
-                  <span className="font-semibold text-base text-gray-600">Quote ID:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.quote_id}</span>
+                  <span className="font-semibold text-base text-gray-600">
+                    Quote ID:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.quote_id}
+                  </span>
                 </div>
-                <div className=" flex p-3  w-full sm:w-6/12 justify-between">   <span className="font-semibold text-base text-gray-600">Name:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.username}</span></div>
+                <div className=" flex p-3  w-full sm:w-6/12 justify-between">
+                  {" "}
+                  <span className="font-semibold text-base text-gray-600">
+                    Name:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.username}
+                  </span>
+                </div>
               </div>
 
               <div className="sm:flex w-full justify-between border-b  border-gray-800 gap-5  ">
                 <div className="  w-full p-3 sm:w-6/12 flex justify-between border-b  border-gray-800 sm:border-none">
-                  <span className="font-semibold text-base text-gray-600">Email:</span>
-                  <span className="text-black-800 font-semibold  truncate max-w-[60%] text-base"
+                  <span className="font-semibold text-base text-gray-600">
+                    Email:
+                  </span>
+                  <span
+                    className="text-black-800 font-semibold  truncate max-w-[60%] text-base"
                     title={form.email} // Full email shown on hover
                   >
                     {form.email}
                   </span>
                 </div>
-                <div className=" flex p-3  w-full sm:w-6/12 justify-between"> <span className="font-semibold text-base text-gray-600">Phone:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.phone}</span></div>
+                <div className=" flex p-3  w-full sm:w-6/12 justify-between">
+                  {" "}
+                  <span className="font-semibold text-base text-gray-600">
+                    Phone:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.phone}
+                  </span>
+                </div>
               </div>
-
 
               <div className="sm:flex w-full justify-between border-b  border-gray-800 gap-5  ">
                 <div className="  w-full p-3 sm:w-6/12 flex justify-between border-b  border-gray-800 sm:border-none">
                   <span className="font-semibold text-base text-gray-600">
                     Shipping From:
                   </span>
-                  <span className="text-black-800 font-semibold  text-base">{form.ship_form}</span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.ship_form}
+                  </span>
                 </div>
-                <div className=" flex p-3 w-full sm:w-6/12 justify-between">  <span className="font-semibold text-base text-gray-600">
-                  Shipping To:
-                </span>
-                  <span className="text-black-800 font-semibold  text-base">{form.ship_to}</span></div>
+                <div className=" flex p-3 w-full sm:w-6/12 justify-between">
+                  {" "}
+                  <span className="font-semibold text-base text-gray-600">
+                    Shipping To:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.ship_to}
+                  </span>
+                </div>
               </div>
-
-
 
               <div className="sm:flex w-full justify-between border-b  border-gray-800 gap-5">
                 <div className="  w-full p-3 sm:w-6/12 flex justify-between border-b  border-gray-800 sm:border-none">
                   <span className="font-semibold text-base text-gray-600">
                     Transport Method:
                   </span>
-                  <span className="text-black-800 font-semibold  text-base">{form.transport_method}</span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.transport_method}
+                  </span>
                 </div>
 
                 <div className=" flex p-3  w-full sm:w-6/12 justify-between">
-                  <span className="font-semibold text-base text-gray-600">IP Address:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.ip}</span>
+                  <span className="font-semibold text-base text-gray-600">
+                    IP Address:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.ip}
+                  </span>
                 </div>
               </div>
             </div>
@@ -324,24 +615,38 @@ const QuoteDetails = () => {
             <div className="right-colum">
               <div className="sm:flex w-full justify-between border-b  border-gray-800 gap-5  ">
                 <div className="  w-full p-3 sm:w-6/12 flex justify-between border-b  border-gray-800 sm:border-none ">
-                  <span className="font-semibold text-base  text-gray-600">Year:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.year}</span>
+                  <span className="font-semibold text-base  text-gray-600">
+                    Year:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.year}
+                  </span>
                 </div>
                 <div className=" flex  w-full p-3 sm:w-6/12 justify-between ">
-                  <span className="font-semibold text-base text-gray-600">Make:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.make}</span>
+                  <span className="font-semibold text-base text-gray-600">
+                    Make:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.make}
+                  </span>
                 </div>
               </div>
               <div className="sm:flex w-full justify-between border-b  border-gray-800 gap-5 ">
                 <div className=" w-full p-3 sm:w-6/12 flex justify-between border-b  border-gray-800 sm:border-none">
-                  <span className="font-semibold text-base text-gray-600">Model:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.model}</span>
+                  <span className="font-semibold text-base text-gray-600">
+                    Model:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.model}
+                  </span>
                 </div>
                 <div className=" flex p-3 w-ful sm:w-6/12 justify-between">
                   <span className="font-semibold text-base text-gray-600">
                     Vehicle Type:
                   </span>
-                  <span className="text-black-800 font-semibold  text-base">{form.vehicle_type}</span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.vehicle_type}
+                  </span>
                 </div>
               </div>
 
@@ -355,18 +660,29 @@ const QuoteDetails = () => {
                   </span>
                 </div>
                 <div className=" flex p-3 w-ful sm:w-6/12 justify-between">
-                  <span className="font-semibold text-base text-gray-600">Distance:</span>
-                  <span className="text-black-800 font-semibold  text-base">{form.distance}</span>
+                  <span className="font-semibold text-base text-gray-600">
+                    Distance:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    {form.distance}
+                  </span>
                 </div>
               </div>
               <div className="sm:flex w-full justify-between border-b  border-gray-800 gap-5 ">
                 <div className="  w-full p-3 sm:w-6/12 flex justify-between border-b  border-gray-800 sm:border-none">
-                  <span className="font-semibold text-base text-gray-600">Price:</span>
-                  <span className="text-black-800 font-semibold  text-base">$ {form.price}</span>
+                  <span className="font-semibold text-base text-gray-600">
+                    Price:
+                  </span>
+                  <span className="text-black-800 font-semibold  text-base">
+                    $ {form.price}
+                  </span>
                 </div>
                 <div className=" p-3   flex w-ful sm:w-6/12 justify-between">
-                  <span className="font-semibold text-base text-gray-600">Source Url:</span>
-                  <span className="text-black-800 font-semibold  truncate max-w-[60%]  text-base"
+                  <span className="font-semibold text-base text-gray-600">
+                    Source Url:
+                  </span>
+                  <span
+                    className="text-black-800 font-semibold  truncate max-w-[60%]  text-base"
                     title={form.sourceUrl} // Full email shown on hover
                   >
                     {form.sourceUrl}
@@ -378,7 +694,7 @@ const QuoteDetails = () => {
 
           <div className="mt-2 space-y-4">
             <div className="flex flex-col">
-              <label className="font-semibold text-gray-600">Enter Pickup ID</label>
+              <label className="font-semibold text-gray-600">Pickup ID</label>
               <div className="flex items-center">
                 <input
                   type="text"
@@ -387,24 +703,6 @@ const QuoteDetails = () => {
                   className="w-full p-2 border border-gray-300 rounded"
                   placeholder="Enter Pickup ID"
                 />
-                <button
-                  onClick={handleUpdateForm}
-                  className="bg-green-500 text-white p-2 rounded ml-2"
-                >
-                  Submit
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="font-semibold text-gray-600">Note</label>
-              <div className="flex items-center">
-                <textarea
-                  value={note || form.note}
-                  onChange={(e) => setNote(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  placeholder="Enter Note"
-                ></textarea>
                 <button
                   onClick={handleUpdateForm}
                   className="bg-green-500 text-white p-2 rounded ml-2"
@@ -481,7 +779,7 @@ const QuoteDetails = () => {
                     type="radio"
                     value="Done"
                     checked={status === "Done"}
-                    onChange={(e) => setStatus(e.target.value)}
+                    onChange={(e) => setStatus(e.target.value )}
                     className="mr-2"
                   />
                   Done
@@ -494,6 +792,55 @@ const QuoteDetails = () => {
                 </button>
               </div>
             </div>
+
+
+            
+
+            <div className="flex flex-col">
+              {/* Input Box for Adding Notes */}
+              <label className="font-semibold text-gray-600">Add a Note</label>
+              <div className="flex items-center mb-4">
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                  placeholder="Enter Note"
+                ></textarea>
+                <button
+                  onClick={handleAddNote}
+                  className="bg-green-500 text-white p-2 rounded ml-2"
+                >
+                  Add Note
+                </button>
+              </div>
+
+              {/* Display Notes */}
+              <div>
+                <h3 className="font-semibold text-gray-600 mb-2">Notes</h3>
+                {form.notes && form.notes.length > 0 ? (
+                  <ul className="space-y-2">
+                    {form.notes.map((note, index) => (
+                      <li
+                        key={index}
+                        className="p-2 border border-gray-300 rounded"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span>{note.note_content}</span>
+                          <span className="text-sm text-gray-500">
+                            <b>{note.username} </b>
+                            {new Date(note.note_time).toLocaleString()}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No notes added yet.</p>
+                )}
+              </div>
+            </div>
+
+            
           </div>
 
           <div className="mt-8 flex flex-wrap gap-4 justify-center sm:justify-start">
@@ -510,10 +857,7 @@ const QuoteDetails = () => {
               Driver Confirm
             </button>
 
-            <button
-              onClick={fetchCardDetails}
-              className="bg-blue-500 text-white p-2 "
-            >
+            <button onClick={openModal} className="bg-blue-500 text-white p-2 ">
               View Card Details
             </button>
             <button
@@ -530,8 +874,6 @@ const QuoteDetails = () => {
               Update
             </button>
           </div>
-
-
         </div>
 
         {/* New Container */}
@@ -682,48 +1024,159 @@ const QuoteDetails = () => {
       )}
 
       {/* Modal for Card Details */}
-      {isCardModalOpen && cardDetails && (
+      {isCardModalOpen && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] sm:w-[800px] max-h-[80vh] overflow-y-auto">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Card Details
+              {cardDetails ? "Card Details" : "Add Card Details"}
             </h2>
 
-            {/* Display Card Details */}
-            <div className="space-y-4">
-              <div>
-                <strong>Quote ID:</strong> {cardDetails.quote_id}
+            {/* If card details exist, display them; otherwise show the form */}
+            {cardDetails ? (
+              <div className="space-y-4">
+                <div>
+                  <strong>Quote ID:</strong> {cardDetails.quote_id}
+                </div>
+                <div>
+                  <strong>Card Holder Name:</strong> {cardDetails.card_name}
+                </div>
+                <div>
+                  <strong>Card Number:</strong> {cardDetails.card_number}
+                </div>
+                <div>
+                  <strong>Expiration Date:</strong> {cardDetails.card_expiry}
+                </div>
+                <div>
+                  <strong>CVV:</strong> {cardDetails.card_cvv}
+                </div>
+                <div>
+                  <strong>Billing Address:</strong>{" "}
+                  {cardDetails.billing_address}
+                </div>
+                <div>
+                  <strong>Billing City:</strong> {cardDetails.billing_city}
+                </div>
+                <div>
+                  <strong>Billing State:</strong> {cardDetails.billing_state}
+                </div>
+                <div>
+                  <strong>Billing Zip:</strong> {cardDetails.billing_zip}
+                </div>
               </div>
-              <div>
-                <strong>Card Holder Name:</strong> {cardDetails.card_name}
-              </div>
-              <div>
-                <strong>Card Number:</strong> {cardDetails.card_number}
-              </div>
-              <div>
-                <strong>Expiration Date:</strong> {cardDetails.card_expiry}
-              </div>
-              <div>
-                <strong>CVV:</strong> {cardDetails.card_cvv}
-              </div>
-              <div>
-                <strong>Billing Address:</strong>{" "}
-                {cardDetails.billing_address}
-              </div>
-              <div>
-                <strong>Billing City:</strong> {cardDetails.billing_city}
-              </div>
-              <div>
-                <strong>Billing State:</strong> {cardDetails.billing_state}
-              </div>
-              <div>
-                <strong>Billing Zip:</strong> {cardDetails.billing_zip}
-              </div>
-            </div>
+            ) : (
+              <form onSubmit={handleCardSubmit} className="space-y-4">
+                {/* Form fields */}
+                <div>
+                  <label className="block">Quote ID:</label>
+                  <input
+                    type="text"
+                    name="quote_id"
+                    value={newCard.quote_id}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">Card Holder Name:</label>
+                  <input
+                    type="text"
+                    name="card_name"
+                    value={newCard.card_name}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">Card Number:</label>
+                  <input
+                    type="text"
+                    name="card_number"
+                    value={newCard.card_number}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">Expiration Date:</label>
+                  <input
+                    type="text"
+                    name="card_expiry"
+                    value={newCard.card_expiry}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">CVV:</label>
+                  <input
+                    type="text"
+                    name="card_cvv"
+                    value={newCard.card_cvv}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">Billing Address:</label>
+                  <input
+                    type="text"
+                    name="billing_address"
+                    value={newCard.billing_address}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">Billing City:</label>
+                  <input
+                    type="text"
+                    name="billing_city"
+                    value={newCard.billing_city}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">Billing State:</label>
+                  <input
+                    type="text"
+                    name="billing_state"
+                    value={newCard.billing_state}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block">Billing Zip:</label>
+                  <input
+                    type="text"
+                    name="billing_zip"
+                    value={newCard.billing_zip}
+                    onChange={handleCardChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="py-2 px-4 bg-green-600 text-white rounded"
+                >
+                  Save Card
+                </button>
+              </form>
+            )}
 
             <div className="mt-4">
               <button
-                onClick={() => setIsCardModalOpen(false)}
+                onClick={closeModal}
                 className="ml-4 text-gray-600 py-2 px-6 border rounded"
               >
                 Close
@@ -849,4 +1302,4 @@ const QuoteDetails = () => {
   );
 };
 
-export default QuoteDetails;
+export default withAuth(QuoteDetails);

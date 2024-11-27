@@ -208,7 +208,7 @@ const CarriersPage = () => {
     <div className="flex h-screen">
     {/* sidebar  */}
     <Sidebar/>
-    <div className="max-w-7xl container mx-auto p-6">
+    <div className="max-w-7xl container mx-auto p-6 mt-10">
       <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
         Carriers List
       </h1>
@@ -257,15 +257,20 @@ const CarriersPage = () => {
               </option>
             ))}
           </select>
-          <Link href="/CreateCarrierPage">
+        </div>
+
+        <div className="w-full md:w-1/5">
+        <Link href="/CreateCarrierPage" className="ml-10">
           <button
-            className="ml-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+            className=" bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 mt-9"
           >
-            Create Carrier
+            Create New Carrier
           </button>
           </Link>
+        
         </div>
       </div>
+    
 
       {/* Carriers Table */}
       <div className="overflow-x-auto bg-white shadow rounded-lg">

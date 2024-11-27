@@ -51,8 +51,9 @@ const CardForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         try {
+            // Submit card details
             const res = await fetch('http://localhost:5000/api/card', {
                 method: 'POST',
                 headers: {
@@ -60,11 +61,41 @@ const CardForm = () => {
                 },
                 body: JSON.stringify(formData),
             });
-
+    
             if (res.ok) {
                 const newCard = await res.json();
                 setSuccess('Card details submitted successfully!');
                 setError('');
+    
+                // Automatically send an email
+                const emailRes = await fetch('http://localhost:5000/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        to: formData.email,
+                        subject: 'Card Submission Successful',
+                        message: `
+                            <h1>${formData.username}'s</h1>
+                            <p>card details have been successfully submitted. Below are the billing details:</p>
+                            <ul>
+                                <li><strong>Quote ID:</strong> ${formData.quote_id}</li>
+                                <li><strong>Quote ID:</strong> ${formData.card_name}</li>
+                                <li><strong>Billing Address:</strong> ${formData.billing_address}, ${formData.billing_city}, ${formData.billing_state}, ${formData.billing_zip}</li>
+                            </ul>
+                            <p>Feel free to contact us if you have any questions.</p>
+                        `,
+                    }),
+                });
+    
+                if (!emailRes.ok) {
+                    const emailError = await emailRes.json();
+                    console.error('Email error:', emailError);
+                    setError('Card submitted but email failed to send.');
+                }
+    
+                // Reset form data
                 setFormData({
                     quote_id: '',
                     username: '',
@@ -76,7 +107,7 @@ const CardForm = () => {
                     card_name: '',
                     card_number: '',
                     card_expiry: '',
-                    card_cvv: ''
+                    card_cvv: '',
                 });
                 setCurrentStep(1); // Reset to step 1 after successful submission
             } else {
@@ -87,6 +118,7 @@ const CardForm = () => {
             setError('Error submitting form');
         }
     };
+    
 
     const nextStep = () => {
         if (currentStep === 1) {

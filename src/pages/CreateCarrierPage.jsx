@@ -102,14 +102,13 @@ const CreateCarrierPage = () => {
       alert('There was an error creating the carrier.');
     }
   };
-
   return (
 
     <div className="flex h-screen">
     {/* sidebar  */}
     <Sidebar/>
-    <div className="max-w-4xl container p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">Create Carrier</h1>
+    <div className="max-w-4xl container p-4 mt-10 m-auto">
+      <h1 className="text-2xl font-bold text-center mb-6 ">Create Carrier</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Carrier Info Fields */}
         <div>

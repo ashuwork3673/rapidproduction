@@ -1,7 +1,6 @@
-import React, { useState,useEffect } from "react";
-import { FaBars } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaUserAlt } from "react-icons/fa";
 import Link from "next/link";
-import { FaUserAlt } from 'react-icons/fa'; // Import React icon for user
 
 function ResponsiveNavbar() {
   const styles = {
@@ -34,32 +33,41 @@ function ResponsiveNavbar() {
       color: "white",
       fontSize: "1.2rem",
     },
-    dropdownMenu: {
-      listStyle: "none",
-      padding: 0,
-      margin: 0,
-      backgroundColor: "#1a2d43",
+    popup: {
       position: "absolute",
-      top: "60px",
-      left: "0",
-      width: "100%",
-      textAlign: "center",
+      top: "50px", // Position the popup just below the username
+      right: "0",
+      backgroundColor: "white",
+      color: "#1a2d43",
+      padding: "10px",
+      borderRadius: "8px",
+      width: "200px",
+      boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
       display: "none", // Hidden by default
       flexDirection: "column",
-      gap: "10px",
+      alignItems: "center",
     },
-    dropdownItem: {
-      textDecoration: "none",
+    popupShow: {
+      display: "flex", // Show popup when triggered
+    },
+    popupButton: {
+      marginTop: "10px",
+      padding: "8px 16px",
+      backgroundColor: "#1a2d43",
       color: "white",
-      padding: "10px",
-      display: "block",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer",
     },
   };
 
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  useState(false);
   const [username, setUsername] = useState(""); // State to store username
-  const [error, setError] = useState(""); // State for error messages
+  const [email, setEmail] = useState(""); // State to store username
+  const [full_name, setFull_name] = useState(""); // State to store username
+  const [phone, setPhone] = useState(""); // State to store username
+  const [role, setRole] = useState(""); // State to store username
+  const [isPopupOpen, setPopupOpen] = useState(false); // State to control popup visibility
 
   const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
 
@@ -74,58 +82,72 @@ function ResponsiveNavbar() {
     const user = localStorage.getItem("user");
     if (user) {
       const parsedUser = JSON.parse(user);
-      setUsername(parsedUser.username || "Unknown User");
+      setUsername(parsedUser.username || "Unknown");
+      setEmail(parsedUser.email || "Unknown");
+      setFull_name(parsedUser.full_name || "Unknown");
+      setPhone(parsedUser.phone || "Unknown");
+      setRole(parsedUser.role || "Unknown");
     }
   }, []); // Runs only once on component mount
 
+  // Handle hover open and click toggle
+  const handleMouseEnter = () => {
+    if (!isPopupOpen) setPopupOpen(true); // Open on hover if not already clicked
+  };
+
+  const handleMouseLeave = () => {
+    if (!isPopupOpen) setPopupOpen(false); // Close on hover out if not already clicked
+  };
+
+  const handleClick = () => {
+    setPopupOpen(!isPopupOpen); // Toggle popup visibility on click
+  };
 
   return (
     <nav style={styles.navbar}>
       <h2 style={styles.logo}>Rapid Auto Shipping</h2>
 
       <ul
-  className={`menu-large ${isDropdownOpen ? "show-mobile-menu" : ""}`}
-  style={{
-    ...styles.menu,
-    display: isDropdownOpen ? "flex" : "",
-    flexDirection: isDropdownOpen ? "column" : "",
-    gap: isDropdownOpen ? "10px" : "",
-  }}
->
-  <li>
-    <Link href="/Dashboard" style={styles.menuItem}>
-      Dashboard
-    </Link>
-  </li>
-  <li>
-    <Link href="/FormQuote" style={styles.menuItem}>
-      Form Quote
-    </Link>
-  </li>
-  <li>
-    <Link href="/CarriersPage" style={styles.menuItem}>
-      Carriers List
-    </Link>
-  </li>
+        className={`menu-large ${isDropdownOpen ? "show-mobile-menu" : ""}`}
+        style={{
+          ...styles.menu,
+          display: isDropdownOpen ? "flex" : "",
+          flexDirection: isDropdownOpen ? "column" : "",
+          gap: isDropdownOpen ? "10px" : "",
+        }}
+      >
+        <li>
+          <Link href="/Dashboard" style={styles.menuItem}>
+            Dashboard
+          </Link>
+        </li>
+        <li>
+          <Link href="/FormQuote" style={styles.menuItem}>
+            Form Quote
+          </Link>
+        </li>
+        <li>
+          <Link href="/CarriersPage" style={styles.menuItem}>
+            Carriers List
+          </Link>
+        </li>
 
-  {/* Display username or error */}
-  <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-    {error ? (
-      <span className="text-red-500">{error}</span> // Show error if there's an issue
-    ) : (
-      <>
-        <FaUserAlt /> {/* User icon */}
-        <span>{username || "Loading..."}</span> {/* Display username or loading */}
-      </>
-    )}
-  </li>
-
-  <li>
-    <button onClick={handleLogout} style={styles.menuItem}>
-      Logout
-    </button>
-  </li>
-</ul>
+        {/* User Profile with Popup Trigger */}
+        <li
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+          }}
+          onClick={handleClick} // Toggle popup on click
+          onMouseEnter={handleMouseEnter} // Open popup on hover
+          onMouseLeave={handleMouseLeave} // Close popup on hover out
+        >
+          <FaUserAlt />
+          {/* <span>{username || "Loading..."}</span> */}
+        </li>
+      </ul>
 
       {/* Toggle button for smaller screens */}
       <button
@@ -136,16 +158,59 @@ function ResponsiveNavbar() {
         <FaBars />
       </button>
 
+      {/* Popup for user details */}
+      <div
+  style={{
+    ...styles.popup,
+    ...(isPopupOpen ? styles.popupShow : {}),
+  }}
+>
+  <div className="relative bg-white p-2 rounded-lg shadow-lg w-80">
+    {/* Close button */}
+   
+    <button
+      className=" bg-red-300 hover:bg-red-300 text-gray-800 rounded-full p-1"
+      onClick={() => setPopupOpen(false)} // Ensure this function updates the popup state
+      aria-label="Close"
+    >
+      ✕
+    </button>
+    <h3 className="text-xl font-semibold mb-4">User Profile</h3>
+
+   
+    <p className="mb-2">
+      <strong>Full Name:</strong> {full_name}
+    </p>
+    <p className="mb-2">
+      <strong>Role:</strong> {role}
+    </p>
+    <p className="mb-2">
+      <strong>Username:</strong> {username || "Unknown"}
+    </p>
+    <p className="mb-2 truncate max-w-[60%]">
+      <strong>Email:</strong> {email}
+    </p>
+    <p className="mb-4">
+      <strong>Phone:</strong> {phone}
+    </p>
+    <button
+      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+      onClick={handleLogout}
+    >
+      Logout
+    </button>
+  </div>
+</div>
+
+
       {/* CSS for responsiveness */}
       <style jsx>{`
-        
         @media (min-width: 768px) {
           .menu-large {
             display: flex; /* Show menu items inline */
-            gap:3%;
-            width:50%;
-            justify-content:flex-end;
-            
+            gap: 3%;
+            width: 50%;
+            justify-content: flex-end;
           }
           .toggle-btn {
             display: none; /* Hide toggle button */
