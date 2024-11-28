@@ -2,10 +2,6 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import "../app/globals.css";
 import {
-  FaHome,
-  FaFileAlt,
-  FaClipboardList,
-  FaBars,
   FaPlus,
   FaEdit,
   FaEye,

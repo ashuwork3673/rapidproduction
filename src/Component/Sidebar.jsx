@@ -132,6 +132,14 @@ function ResponsiveNavbar() {
           </Link>
         </li>
 
+        {email === "admin@gmail.com" && (
+        <li>
+          <Link href="/usercreation" style={styles.menuItem}>
+            Users
+          </Link>
+        </li>
+          )}
+
         {/* User Profile with Popup Trigger */}
         <li
           style={{

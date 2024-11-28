@@ -68,7 +68,7 @@ const QuoteDetails = () => {
   });
   const [Demail, setDEmail] = useState({
     to: "",
-    subject: "Your Quote Details",
+    subject: "Driver Confirm ",
     message: "",
   });
   const [cardDetails, setCardDetails] = useState(null);
@@ -214,30 +214,6 @@ const QuoteDetails = () => {
       alert("Failed to add the note. Please try again.");
     }
   };
-
-  // // useEffect(() => {
-  // //   // Fetch form data on component load
-  // //   const fetchFormData = async () => {
-  // //     try {
-  // //       const res = await fetch("http://localhost:5000/api/form");
-  // //       const data = await res.json();
-  // //       if (data && data.length > 0) {
-  // //         const latestForm = data[data.length - 1];
-  // //         setNewCard((prevFormData) => ({
-  // //           ...prevFormData,
-  // //           quote_id: latestForm.quote_id,
-  // //           username: latestForm.username,
-  // //           email: latestForm.email,
-  // //         }));
-  // //       }
-  // //     } catch (error) {
-  // //       console.error("Error fetching form data:", error);
-  // //       setError("Error loading form data");
-  // //     }
-  // //   };
-
-  //   fetchFormData();
-  // }, []);
 
   useEffect(() => {
     if (id) {
@@ -446,8 +422,6 @@ const QuoteDetails = () => {
     setEditableForm({ ...editableForm, [name]: value });
   };
 
-  
-
   const handleUpdateForm = async () => {
     try {
       // Prepare the updated data, fallback to the existing `form` values if not changed
@@ -480,8 +454,6 @@ const QuoteDetails = () => {
       console.error("Error updating form:", error);
     }
   };
-
-  
 
   const handleSendEmail = async () => {
     const emailPayload = {
@@ -518,7 +490,7 @@ const QuoteDetails = () => {
     return <div className="text-center text-gray-600 py-10">Loading...</div>;
 
   return (
-    <div className="flex h-screen overflow-auto">
+    <div className="flex  overflow-auto">
       {/* Sidebar */}
       <Sidebar />
 
@@ -779,7 +751,7 @@ const QuoteDetails = () => {
                     type="radio"
                     value="Done"
                     checked={status === "Done"}
-                    onChange={(e) => setStatus(e.target.value )}
+                    onChange={(e) => setStatus(e.target.value)}
                     className="mr-2"
                   />
                   Done
@@ -792,9 +764,6 @@ const QuoteDetails = () => {
                 </button>
               </div>
             </div>
-
-
-            
 
             <div className="flex flex-col">
               {/* Input Box for Adding Notes */}
@@ -839,8 +808,6 @@ const QuoteDetails = () => {
                 )}
               </div>
             </div>
-
-            
           </div>
 
           <div className="mt-8 flex flex-wrap gap-4 justify-center sm:justify-start">

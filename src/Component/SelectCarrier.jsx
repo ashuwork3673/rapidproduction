@@ -119,7 +119,7 @@ const SelectCarriers = ({ quote_id }) => {
         // Parse error response if not JSON
         const errorText = await response.text();
         console.error("Server error:", errorText);
-        throw new Error(`Failed to add carrier: ${response.statusText}`);
+        window.location.reload()
       }
 
       const data = await response.json();
