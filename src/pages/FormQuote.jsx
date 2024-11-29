@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { FaSearch } from "react-icons/fa";
 import axios from "axios";
 import "../app/globals.css";
-import "../styles/dashboard.css"
+import "../styles/dashboard.css";
 import Sidebar from "@/Component/Sidebar";
 import DashboardForm from "@/Component/DashboardForm";
 import withAuth from "@/Component/withAuth";
@@ -37,7 +37,7 @@ const FormQuote = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [clickedForms, setClickedForms] = useState([]); // Track clicked forms
-  const[username,setUsername]=useState("")
+  const [username, setUsername] = useState("");
   const router = useRouter();
 
   const fetchForms = async () => {
@@ -59,43 +59,42 @@ const FormQuote = () => {
     fetchForms();
   }, []);
 
-
-
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) {
       const parsedUser = JSON.parse(user);
       setUsername(parsedUser.username || "Unknown");
-     
     }
   }, []);
 
   const handleFormClick = async (form) => {
     // Retrieve the username from localStorage
-   
-  
+
     // Mark form as clicked and persist it in localStorage
     if (!clickedForms.includes(form._id)) {
       const updatedClickedForms = [...clickedForms, form._id];
       setClickedForms(updatedClickedForms);
       localStorage.setItem("clickedForms", JSON.stringify(updatedClickedForms));
     }
-  
+
     // Update the form with the username as 'pickup_by'
     const updatedData = {
-      picked_by: username,  // Set the pickup_by field to the retrieved username
+      picked_by: username, // Set the pickup_by field to the retrieved username
     };
-  
+
     // Make an API request to update the form in the backend
     try {
-      const response = await fetch(`http://localhost:5000/api/form/${form._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
-  
+      const response = await fetch(
+        `http://localhost:5000/api/form/${form._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
+
       if (response.ok) {
         const result = await response.json();
         console.log("Form updated successfully:", result);
@@ -105,12 +104,10 @@ const FormQuote = () => {
     } catch (error) {
       console.error("Error updating form:", error);
     }
-  
+
     // Navigate to QuoteDetails page
     router.push(`/QuoteDetails?id=${form._id}`);
   };
-  
-  
 
   const filteredForms = forms.filter((form) => {
     const query = searchQuery.toLowerCase();
@@ -172,7 +169,7 @@ const FormQuote = () => {
         <div className="mt-4 overflow-x-auto bg-white shadow-md rounded-lg">
           <table className="min-w-full table-auto border-collapse border border-gray-300 rounded-lg">
             <thead>
-              <tr className="bg-indigo-600 text-white">
+              <tr className="bg-blue-600 text-white">
                 <th className="px-6 py-3 text-left font-semibold uppercase tracking-wider border-b border-gray-200">
                   Quote ID
                 </th>
@@ -226,20 +223,21 @@ const FormQuote = () => {
                   </td>
                   <td className="px-6 py-4 border-b border-gray-200">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${form.status === "Done"
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        form.status === "Done"
                           ? "bg-green-100 text-green-700"
                           : form.status === "in-progress"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : form.status === "waiting"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-red-100 text-red-700"
-                        } `}
+                          ? "bg-yellow-100 text-yellow-700"
+                          : form.status === "waiting"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-red-100 text-red-700"
+                      } `}
                     >
                       {form.status}
                     </span>
                   </td>
-                  <td>
-                    {form.picked_by}
+                  <td className="px-6 py-4 border-b border-gray-200">
+                    <b> {form.picked_by}</b>
                   </td>
                 </tr>
               ))}

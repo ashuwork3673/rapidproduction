@@ -169,7 +169,7 @@ const UsersPage = () => {
         <div className="overflow-x-auto">
           <table className="min-w-full table-auto border-collapse">
             <thead>
-              <tr className="bg-gray-100">
+              <tr className="bg-blue-600  text-white">
                 <th className="px-4 py-2 text-left">Username</th>
                 <th className="px-4 py-2 text-left">Full Name</th>
                 <th className="px-4 py-2 text-left">Email</th>

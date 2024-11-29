@@ -456,8 +456,7 @@ function DashboardForm() {
             <div>
               <label
                 className="block text-sm font-semibold mb-2"
-                htmlFor="username"
-              >
+                htmlFor="username">
                 Name:
               </label>
               <input

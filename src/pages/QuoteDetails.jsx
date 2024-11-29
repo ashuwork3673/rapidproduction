@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import "../app/globals.css";
 import Sidebar from "@/Component/Sidebar";
@@ -68,7 +68,7 @@ const QuoteDetails = () => {
   });
   const [Demail, setDEmail] = useState({
     to: "",
-    subject: "Driver Confirm ",
+    subject: "Driver Confirm",
     message: "",
   });
   const [cardDetails, setCardDetails] = useState(null);
@@ -76,13 +76,65 @@ const QuoteDetails = () => {
   const [CarrierDetails, setCarrierDetails] = useState(null);
   const [isCarrierModalOpen, setIsCarrierModalOpen] = useState(false);
   const [nusername, setNUsername] = useState(""); // State to store username
+  const [shipFromSuggestions, setShipFromSuggestions] = useState([]);
+  const [shipToSuggestions, setShipToSuggestions] = useState([]);
 
+  const shipFromRef = useRef(null);
+  const shipToRef = useRef(null);
+
+
+
+
+  const fetchAddressSuggestions = async (address, setSuggestions) => {
+    if (!address) return;
+
+    try {
+      const response = await fetch(`/api/google-autocomplete?address=${encodeURIComponent(address)}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuggestions(data); // Set the suggestions for the input field
+      } else {
+        console.error('Error fetching address suggestions:', data.error);
+      }
+    } catch (error) {
+      console.error('Error with fetch request:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.google) {
+      // Initialize Autocomplete for "Ship From"
+      const shipFromAutocomplete = new window.google.maps.places.Autocomplete(shipFromRef.current, {
+        types: ['geocode'], // Restrict to geocode results (places with addresses)
+      });
+
+      shipFromAutocomplete.addListener('place_changed', () => {
+        const place = shipFromAutocomplete.getPlace();
+        if (place && place.formatted_address) {
+          setShipFrom(place.formatted_address); // Set the full address in the state
+        }
+      });
+
+      // Initialize Autocomplete for "Ship To"
+      const shipToAutocomplete = new window.google.maps.places.Autocomplete(shipToRef.current, {
+        types: ['geocode'], // Restrict to geocode results (places with addresses)
+      });
+
+      shipToAutocomplete.addListener('place_changed', () => {
+        const place = shipToAutocomplete.getPlace();
+        if (place && place.formatted_address) {
+          setShipTo(place.formatted_address); // Set the full address in the state
+        }
+      });
+    }
+  }, []);
   // Handle input changes for car fields
   const handleCarChange = (e) => {
     const { name, value } = e.target;
     setCar({ ...car, [name]: value });
   };
-
+  
   // Add a new car
   const handleAddCar = async () => {
     if (
@@ -699,7 +751,7 @@ const QuoteDetails = () => {
                 />
                 <button
                   onClick={handleUpdateForm}
-                  className="bg-green-500 text-white p-2 rounded ml-2"
+                  className="bg-blue-500 text-white p-2 rounded ml-2"
                 >
                   Submit
                 </button>
@@ -718,7 +770,7 @@ const QuoteDetails = () => {
                 />
                 <button
                   onClick={handleUpdateForm}
-                  className="bg-green-500 text-white p-2 rounded ml-2"
+                  className="bg-blue-500 text-white p-2 rounded ml-2"
                 >
                   Submit
                 </button>
@@ -737,7 +789,7 @@ const QuoteDetails = () => {
                 />
                 <button
                   onClick={handleUpdateForm}
-                  className="bg-green-500 text-white p-2 rounded ml-2"
+                  className="bg-blue-500 text-white p-2 rounded ml-2"
                 >
                   Submit
                 </button>
@@ -780,7 +832,7 @@ const QuoteDetails = () => {
                 </label>
                 <button
                   onClick={handleUpdateForm}
-                  className="bg-green-500 text-white p-2 rounded ml-auto"
+                  className="bg-blue-500 text-white p-2 rounded ml-auto"
                 >
                   Submit
                 </button>
@@ -815,7 +867,6 @@ const QuoteDetails = () => {
                   <option value="">Select Transport Method</option>
                   <option value="Open">Open</option>
                   <option value="Enclosed">Enclosed</option>
-                  <option value="Driveaway">Driveaway</option>
                   {/* Add more options as needed */}
                 </select>
 
@@ -842,10 +893,8 @@ const QuoteDetails = () => {
                   className="p-2 border border-gray-300 rounded"
                 >
                   <option value="">Select Vehicle Type</option>
-                  <option value="Sedan">Sedan</option>
-                  <option value="SUV">SUV</option>
-                  <option value="Truck">Truck</option>
-                  <option value="Van">Van</option>
+                  <option value="running">running</option>
+                  <option value="not-running">not-running</option>
                   {/* Add more options as needed */}
                 </select>
 
@@ -861,7 +910,7 @@ const QuoteDetails = () => {
               </div>
               <button
                 onClick={handleAddCar}
-                className="bg-green-500 text-white p-2 rounded"
+                className="bg-blue-500 text-white p-2 rounded"
               >
                 Add Car
               </button>
@@ -910,7 +959,7 @@ const QuoteDetails = () => {
                 ></textarea>
                 <button
                   onClick={handleAddNote}
-                  className="bg-green-500 text-white p-2 rounded ml-2"
+                  className="bg-blue-500 text-white p-2 rounded ml-2"
                 >
                   Add Note
                 </button>
@@ -969,7 +1018,7 @@ const QuoteDetails = () => {
 
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="bg-blue-500 text-white p-2"
+              className="bg-yellow-500 text-white p-2"
             >
               Update
             </button>
@@ -1031,23 +1080,61 @@ const QuoteDetails = () => {
                 />
               </div>
               <div>
-                <label>Ship From</label>
-                <input
-                  type="text"
-                  value={ship_from || form.ship_form}
-                  onChange={(e) => setShipFrom(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
-              <div>
-                <label>Ship To</label>
-                <input
-                  type="text"
-                  value={ship_to || form.ship_to}
-                  onChange={(e) => setShipTo(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded"
-                />
-              </div>
+        <label>Ship From</label>
+        <input
+          type="text"
+          ref={shipFromRef}
+          value={ship_from || form.ship_form}
+          onChange={(e) => {
+            setShipFrom(e.target.value);
+            fetchAddressSuggestions(e.target.value, setShipFromSuggestions);
+          }}
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+        {/* Display suggestions */}
+        <div className="suggestions">
+          {shipFromSuggestions.map((suggestion, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                setShipFrom(suggestion.description);
+                setShipFromSuggestions([]); // Clear suggestions when clicked
+              }}
+              className="suggestion-item"
+            >
+              {suggestion.description}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <label>Ship To</label>
+        <input
+          type="text"
+          ref={shipToRef}
+          value={ship_to || form.ship_to}
+          onChange={(e) => {
+            setShipTo(e.target.value);
+            fetchAddressSuggestions(e.target.value, setShipToSuggestions);
+          }}
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+        {/* Display suggestions */}
+        <div className="suggestions">
+          {shipToSuggestions.map((suggestion, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                setShipTo(suggestion.description);
+                setShipToSuggestions([]); // Clear suggestions when clicked
+              }}
+              className="suggestion-item"
+            >
+              {suggestion.description}
+            </div>
+          ))}
+        </div>
+      </div>
               <div>
                 <label>Transport Method</label>
                 <input

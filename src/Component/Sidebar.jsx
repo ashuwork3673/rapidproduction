@@ -118,24 +118,24 @@ function ResponsiveNavbar() {
       >
         <li>
           <Link href="/Dashboard" style={styles.menuItem}>
-            Dashboard
+           <b>Dashboard</b>   
           </Link>
         </li>
         <li>
           <Link href="/FormQuote" style={styles.menuItem}>
-            Form Quote
+             <b>Form Quote</b>
           </Link>
         </li>
         <li>
           <Link href="/CarriersPage" style={styles.menuItem}>
-            Carriers List
+            <b>Carriers List</b> 
           </Link>
         </li>
 
         {email === "admin@gmail.com" && (
         <li>
           <Link href="/usercreation" style={styles.menuItem}>
-            Users
+            <b>All Users</b> 
           </Link>
         </li>
           )}
@@ -152,7 +152,7 @@ function ResponsiveNavbar() {
           onMouseEnter={handleMouseEnter} // Open popup on hover
           onMouseLeave={handleMouseLeave} // Close popup on hover out
         >
-          <FaUserAlt />
+          <FaUserAlt style={{width:"50px"}} />
           {/* <span>{username || "Loading..."}</span> */}
         </li>
       </ul>
