@@ -121,6 +121,28 @@ const QuoteDetails = () => {
     }
   };
 
+  const deleteCar = async (carIndex) => {
+    try {
+      // Create a new array of cars without the deleted car
+      const updatedCars = form.cars.filter((_, index) => index !== carIndex);
+
+      // Make the API call to update the cars array on the server
+      const response = await axios.patch(
+        `http://localhost:5000/api/form/update-cars/${form.quote_id}`,
+        { cars: updatedCars }
+      );
+
+      if (response.status === 200) {
+        alert("Car deleted successfully!");
+        // Update the form state with the new cars array
+        setForm((prevForm) => ({ ...prevForm, cars: updatedCars }));
+      }
+    } catch (error) {
+      console.error("Error deleting car:", error);
+      alert("Failed to delete car. Please try again.");
+    }
+  };
+
   const openModal = () => {
     setIsCardModalOpen(true);
     const fetchCardDetails = async () => {
@@ -762,6 +784,117 @@ const QuoteDetails = () => {
                 >
                   Submit
                 </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              {/* Input Box for Adding Cars */}
+              <h2 className="font-semibold text-gray-600 mb-2">Add a Car</h2>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <select
+                  name="make"
+                  value={car.make}
+                  onChange={handleCarChange}
+                  className="p-2 border border-gray-300 rounded"
+                >
+                  <option value="">Select Make</option>
+                  <option value="Toyota">Toyota</option>
+                  <option value="Honda">Honda</option>
+                  <option value="Ford">Ford</option>
+                  <option value="Tesla">Tesla</option>
+                  {/* Add more options as needed */}
+                </select>
+
+                {/* Transport Method dropdown */}
+                <select
+                  name="transport_method"
+                  value={car.transport_method}
+                  onChange={handleCarChange}
+                  className="p-2 border border-gray-300 rounded"
+                >
+                  <option value="">Select Transport Method</option>
+                  <option value="Open">Open</option>
+                  <option value="Enclosed">Enclosed</option>
+                  <option value="Driveaway">Driveaway</option>
+                  {/* Add more options as needed */}
+                </select>
+
+                {/* Model dropdown */}
+                <select
+                  name="model"
+                  value={car.model}
+                  onChange={handleCarChange}
+                  className="p-2 border border-gray-300 rounded"
+                >
+                  <option value="">Select Model</option>
+                  <option value="Corolla">Corolla</option>
+                  <option value="Civic">Civic</option>
+                  <option value="Mustang">Mustang</option>
+                  <option value="Model S">Model S</option>
+                  {/* Add more options as needed */}
+                </select>
+
+                {/* Vehicle Type dropdown */}
+                <select
+                  name="vehicle_type"
+                  value={car.vehicle_type}
+                  onChange={handleCarChange}
+                  className="p-2 border border-gray-300 rounded"
+                >
+                  <option value="">Select Vehicle Type</option>
+                  <option value="Sedan">Sedan</option>
+                  <option value="SUV">SUV</option>
+                  <option value="Truck">Truck</option>
+                  <option value="Van">Van</option>
+                  {/* Add more options as needed */}
+                </select>
+
+                {/* Year input */}
+                <input
+                  type="text"
+                  name="year"
+                  value={car.year}
+                  onChange={handleCarChange}
+                  className="p-2 border border-gray-300 rounded"
+                  placeholder="Year"
+                />
+              </div>
+              <button
+                onClick={handleAddCar}
+                className="bg-green-500 text-white p-2 rounded"
+              >
+                Add Car
+              </button>
+
+              {/* Display Cars */}
+              <div className="mt-4">
+                <h3 className="font-semibold text-gray-600 mb-2">Cars</h3>
+                {form.cars && form.cars.length > 0 ? (
+                  <ul className="space-y-2">
+                    {form.cars.map((car, index) => (
+                      <li
+                        key={index}
+                        className="p-2 border border-gray-300 rounded flex justify-between items-center"
+                      >
+                        <div className="grid grid-cols-5 gap-4">
+                          <span>{car.make}</span>
+                          <span>{car.transport_method}</span>
+                          <span>{car.model}</span>
+                          <span>{car.vehicle_type}</span>
+                          <span>{car.year}</span>
+                        </div>
+                        <button
+                          onClick={() => deleteCar(index)}
+                          className="ml-4 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No cars added yet.</p>
+                )}
               </div>
             </div>
 
